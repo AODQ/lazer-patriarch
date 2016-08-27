@@ -85,6 +85,38 @@ struct INI_Item {
   }
 }
 
+/**
+  Calculates Bresenham's Line Algorithm
+  From: http://www.roguebasin.com/index.php?title=Bresenham%27s_Line_Algorithm
+*/
+import AODCore.vector;
+Vector[] Calculate(int sx, int sy, int ex, int ey) {
+  import std.math;
+  int dx = abs(ex - sx),
+      dy = abs(ey - sx),
+      ix = sx < ex ? 1 : -1,
+      iy = sy < ey ? 1 : -1;
+  int err = dx - dy;
+
+  Vector[] points;
+  while ( true ) {
+    points ~= Vector(sx, sy);
+
+    if ( sx == ex && sy == ey )
+      break;
+
+    int e = err * 2;
+    if ( e2 > -dx ) {
+      err -= dy;
+      sx += ix;
+    }
+    if ( e2 < dx ){
+      err += dx;
+      sy += iy;
+    }
+  }
+}
+
 /** Hashmap representing categories. Each category contains an array of INI_Item
 Example:
 ---

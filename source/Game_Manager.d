@@ -4,7 +4,7 @@ import std.string;
 
 static import Entity.Map;
 Entity.Map.Tile[][][] map;
-Entity.Map.Tile[] darkness;
+Entity.Map.Tile[] shadows;
 Entity.Map.Tile player;
 int map_width, map_height;
 enum Turn {
@@ -298,10 +298,10 @@ void Generate_Map() {
   AOD.Add(player);
   static import Entity.UI;
   AOD.Add(new Entity.UI.HUD);
-  darkness.length = 300;
-  foreach ( i; 0 .. darkness.length ) {
-    darkness[i] = new Entity.Map.Black(0, 0);
-    AOD.Add(darkness[i]);
+  shadows.length = 300;
+  foreach ( i; 0 .. shadows.length ) {
+    shadows[i] = new Entity.Map.Black(0, 0);
+    AOD.Add(shadows[i]);
   }
 }
 

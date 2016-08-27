@@ -33,9 +33,12 @@ public:
 
   override void Update() {
     if ( -- think_timer > 0 ) return;
-    think_timer = cast(int)AOD.R_Rand(Think_timer_start_min, Think_timer_start_max);
+    think_timer = cast(int)AOD.R_Rand(Think_timer_start_min,
+                                      Think_timer_start_max);
     // -- look for player --
-    
+    if ( Game_Manager.player ) {
+
+    }
     // -- movement --
     if ( goal_x == tile_x && goal_y == tile_y ) {
       Generate_New_Goal();
