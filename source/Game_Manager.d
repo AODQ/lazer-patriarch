@@ -306,10 +306,10 @@ void Generate_Map() {
 }
 
 void Update() {
-  int rlx = player.R_Tile_Pos().x - 10, rhx = player.R_Tile_Pos.x + 10;
-  int rly = player.R_Tile_Pos().y - 7,  rhy = player.R_Tile_Pos.y + 7;
-  for ( int i = rlx; i != rhx; ++ i)
-  for ( int j = rly; i != rhy; ++ j ) {
+  /* int rlx = player.R_Tile_Pos().x - 10, rhx = player.R_Tile_Pos.x + 10; */
+  /* int rly = player.R_Tile_Pos().y - 7,  rhy = player.R_Tile_Pos.y + 7; */
+  /* for ( int i = rlx; i != rhx; ++ i) */
+  /* for ( int j = rly; i != rhy; ++ j ) { */
 
-  }
+  /* } */
 }

@@ -76,7 +76,7 @@ float To_Deg(float x) {
   From: http://www.roguebasin.com/index.php?title=Bresenham%27s_Line_Algorithm
 */
 import AODCore.vector;
-Vector[] Calculate(int sx, int sy, int ex, int ey) {
+Vector[] Bresenham_Line(int sx, int sy, int ex, int ey) {
   import std.math;
   int dx = abs(ex - sx),
       dy = abs(ey - sx),
@@ -92,15 +92,16 @@ Vector[] Calculate(int sx, int sy, int ex, int ey) {
       break;
 
     int e = err * 2;
-    if ( e2 > -dx ) {
+    if ( e > -dx ) {
       err -= dy;
       sx += ix;
     }
-    if ( e2 < dx ){
+    if ( e < dx ){
       err += dx;
       sy += iy;
     }
   }
+  return points;
 }
 
 /**

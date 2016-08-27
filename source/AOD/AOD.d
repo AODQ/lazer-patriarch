@@ -169,7 +169,7 @@ public: static:
   alias Remove    = AODCore.utility.Remove;
 
   /** */
-  alias Calculate = AODCore.utility.Calculate;
+  alias Bresenham_Line = AODCore.utility.Bresenham_Line;
 
   /** */
   alias Load_INI  = AODCore.utility.Load_INI;
