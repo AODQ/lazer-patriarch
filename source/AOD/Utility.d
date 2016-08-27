@@ -79,7 +79,7 @@ import AODCore.vector;
 Vector[] Bresenham_Line(int sx, int sy, int ex, int ey) {
   import std.math;
   int dx = abs(ex - sx),
-      dy = abs(ey - sx),
+      dy = abs(ey - sy),
       ix = sx < ex ? 1 : -1,
       iy = sy < ey ? 1 : -1;
   int err = dx - dy;

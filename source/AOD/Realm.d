@@ -330,6 +330,19 @@ public:
         destroy(this);
         return;
       }
+    // ---- NON AOD CODE -----
+    // ---- NON AOD CODE -----
+    // ---- NON AOD CODE -----
+
+    {
+      static import Game_Manager;
+      Game_Manager.Update();
+    }
+
+    // ---- NON AOD CODE -----
+    // ---- NON AOD CODE -----
+    // ---- NON AOD CODE -----
+
 
       { // refresh screen
         float _FPS = 0;
@@ -372,19 +385,6 @@ public:
       a.Update();
       a.Post_Update();
     }
-    // ---- NON AOD CODE -----
-    // ---- NON AOD CODE -----
-    // ---- NON AOD CODE -----
-
-    {
-      static import Game_Manager;
-      Game_Manager.Update();
-    }
-
-    // ---- NON AOD CODE -----
-    // ---- NON AOD CODE -----
-    // ---- NON AOD CODE -----
-
     // remove objects
     foreach ( rem_it; 0 .. objs_to_rem.length ) {
       int layer_it = objs_to_rem[rem_it].R_Layer();

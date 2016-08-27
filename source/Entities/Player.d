@@ -5,12 +5,12 @@ static import Game_Manager;
 
 class Player : Entity.Map.Tile {
   bool key_left, key_right, key_up, key_down;
-  float walk_timer = 0;
+  float walk_timer = 0, shoot_timer = 0;
   immutable(float) Walk_timer_start = 10;
 public:
   this(int x, int y) {
     static import Data;
-    super(x, y, Data.Layer.Player);
+    super(x, y, Entity.Map.Tile_Type.Player, Data.Layer.Player, false);
     Set_Sprite(Data.Image.player);
   }
   override void Update() {
@@ -27,6 +27,15 @@ public:
       }
     }
 
+    if ( -- shoot_timer < 0 && AOD.Input.R_LMB() ) {
+      shoot_timer = 20;
+      import Entity.Projectile;
+      int mx = cast(int)AOD.Input.R_Mouse_X(1),
+          my = cast(int)AOD.Input.R_Mouse_Y(1);
+      AOD.Add(new Projectile(tile_x, tile_y, mx, my,
+                             Entity.Map.Tile_Type.Player));
+    }
+
     -- walk_timer;
 
     if ( walk_timer <= 0 && key_left ) {
@@ -34,11 +43,22 @@ public:
       if ( Game_Manager.Valid_Position(tile_x-1, tile_y) ) {
         Set_Tile_Pos(tile_x-1, tile_y);
       }
+        // -- DEBUG START
+        import std.stdio : writeln;
+        import std.conv : to;
+        writeln(to!string(Game_Manager.map[tile_x-1][tile_y]));
+        // -- DEBUG END
     }
     if ( walk_timer <= 0 && key_right ) {
       walk_timer = Walk_timer_start;
       if ( Game_Manager.Valid_Position(tile_x+1, tile_y) ) {
         Set_Tile_Pos(tile_x+1, tile_y);
+      } else {
+        // -- DEBUG START
+        import std.stdio : writeln;
+        import std.conv : to;
+        writeln(to!string(Game_Manager.map[tile_x+1][tile_y]));
+        // -- DEBUG END
       }
     }
     if ( walk_timer <= 0 && key_up ) {

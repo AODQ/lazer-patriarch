@@ -6,8 +6,9 @@ enum Layer {
   Player = 31,
   Black  = 32,
   Mob    = 33,
-  Item   = 34,
-  Floor  = 35
+  Projectile = 34,
+  Item   = 35,
+  Floor  = 36
 }
 class Menu {
 public: static:
@@ -59,7 +60,7 @@ public: static:
                   mobs;
   AOD.SheetRect black;
   AOD.SheetRect player;
-  AOD.SheetContainer HUD;
+  AOD.SheetContainer HUD, projectile;
   void Initialize() {
     auto sheet = AOD.SheetContainer("assets/tset_wall.png");
     walls = [
@@ -76,6 +77,7 @@ public: static:
     HUD = AOD.SheetContainer("assets/HUD.png");
     sheet = AOD.SheetContainer("assets/tset_mob.png");
     black = walls[1];
+    projectile = AOD.SheetContainer("assets/projectile.png");
     mobs = [
       AOD.SheetRect(sheet , 0   , 0 , 32  , 32) ,
       AOD.SheetRect(sheet , 32  , 0 , 64  , 32) ,

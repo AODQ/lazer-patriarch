@@ -12,11 +12,15 @@ enum Turn {
 };
 Turn current_turn;
 
-bool Valid_Position(int x, int y) {
+bool Valid_Position_Light(int x, int y) {
   if ( x <= 0 || y <= 0 ) return false;
   if ( x >= map.length || y >= map[0].length ) return false;
   if ( map[x][y].length == 0 ) return false;
-  return map[x][y][$-1].R_Can_Be_Stepped_On();
+  return true;
+}
+
+bool Valid_Position(int x, int y) {
+  return Valid_Position_Light(x, y) && map[x][y][$-1].R_Can_Be_Stepped_On();
 }
 
 
@@ -286,8 +290,8 @@ void Generate_Map() {
       if ( tmap[i][j] != 0 ) {
         if ( tmap[i][j] > 100 ) {
           auto m = tmap[i][j] - 101;
-          AOD.Add(new Mob(i, j, m));
           AOD.Add(new Floor(i, j));
+          AOD.Add(new Mob(i, j, m));
         } else if ( tmap[i][j] == -3 )
           AOD.Add(new Wall(i, j));
         else

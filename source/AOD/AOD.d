@@ -141,6 +141,8 @@ alias Menu = AODCore.menu.Menu;
 /** */
 alias Vector = AODCore.vector.Vector;
 /** */
+alias Node   = AODCore.vector.Node;
+/** */
 alias Matrix = AODCore.matrix.Matrix;
 
 /** Bindings to the AODCore.Utility module */
