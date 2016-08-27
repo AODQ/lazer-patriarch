@@ -169,6 +169,9 @@ public: static:
   alias Remove    = AODCore.utility.Remove;
 
   /** */
+  alias Calculate = AODCore.utility.Calculate;
+
+  /** */
   alias Load_INI  = AODCore.utility.Load_INI;
   /** */
   alias INI_Data  = AODCore.utility.INI_Data;

@@ -72,20 +72,6 @@ float To_Deg(float x) {
 }
 
 /**
-  Describes a variable assignment from an INI file
-*/
-struct INI_Item {
-  /** The left-hand side of the assignment */
-  string key,
-  /** The right-hand side of the assignment */
-         value;
-  /** */
-  this(string key_, string value_) {
-    key = key_; value = value_;
-  }
-}
-
-/**
   Calculates Bresenham's Line Algorithm
   From: http://www.roguebasin.com/index.php?title=Bresenham%27s_Line_Algorithm
 */
@@ -114,6 +100,20 @@ Vector[] Calculate(int sx, int sy, int ex, int ey) {
       err += dx;
       sy += iy;
     }
+  }
+}
+
+/**
+  Describes a variable assignment from an INI file
+*/
+struct INI_Item {
+  /** The left-hand side of the assignment */
+  string key,
+  /** The right-hand side of the assignment */
+         value;
+  /** */
+  this(string key_, string value_) {
+    key = key_; value = value_;
   }
 }
 
