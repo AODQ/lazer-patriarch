@@ -1,0 +1,9 @@
+*.swp
+*.dll
+*.exe
+*.sln
+*.html
+.dub/*
+.vs/*
+docs/*
+release/*
