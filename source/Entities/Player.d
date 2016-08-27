@@ -30,8 +30,10 @@ public:
     if ( -- shoot_timer < 0 && AOD.Input.R_LMB() ) {
       shoot_timer = 20;
       import Entity.Projectile;
-      int mx = cast(int)AOD.Input.R_Mouse_X(1),
-          my = cast(int)AOD.Input.R_Mouse_Y(1);
+      int mx = cast(int)AOD.Input.R_Mouse_X(0),
+          my = cast(int)AOD.Input.R_Mouse_Y(0);
+      mx += cast(int)(position.x - 595/2);
+      my += cast(int)(position.y - 395/2);
       AOD.Add(new Projectile(tile_x, tile_y, mx, my,
                              Entity.Map.Tile_Type.Player));
     }

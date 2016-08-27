@@ -55,6 +55,14 @@ auto Construct_New_Menu() {
 
 class Image {
 public: static:
+  enum MapGrid {
+    wall_ctl = -100, wall_ctr = -101, wall_cll = -102, wall_clr = -103,
+
+
+    floor_topleft = -108, floor_top = -109, floor_topright = -110,
+    floor_left = -111,              floor_right = -112,
+    floor_botleft = -113, floor_bot = -114, floor_botright = -115,
+  };
   AOD.SheetRect[] walls,
                   floors,
                   mobs;
@@ -64,13 +72,18 @@ public: static:
   void Initialize() {
     auto sheet = AOD.SheetContainer("assets/tset_wall.png");
     walls = [
-      AOD.SheetRect(sheet, 0, 0, 32, 32),
-      AOD.SheetRect(sheet, 32, 0, 64, 32)
+      AOD.SheetRect(sheet, 3*32,    0, 3*32 + 32,        32), // tl
+      AOD.SheetRect(sheet,   32, 3*32,   32 + 32, 3*32 + 32), // t
+      AOD.SheetRect(sheet, 4*32,    0, 4*32 + 32,        32), // tr
+      AOD.SheetRect(sheet, 2*32,   32, 2*32 + 32,   32 + 32), // l
+      AOD.SheetRect(sheet,    0,   32,   32 + 32,   32 + 32), // r
+      AOD.SheetRect(sheet, 3*32,   32, 3*32 + 32,   32 + 32), // bl
+      AOD.SheetRect(sheet,   32,    0,   32 + 32,        32), // b
+      AOD.SheetRect(sheet, 2*32,    0,   32 + 32,        32)  // br
+
     ];
-    sheet = AOD.SheetContainer("assets/tset_floor.png");
     floors = [
-      AOD.SheetRect(sheet, 0, 0, 32, 32),
-      AOD.SheetRect(sheet, 32, 0, 64, 32)
+      AOD.SheetRect(sheet, 32, 5*32, 64, 5*32+32)
     ];
     sheet = AOD.SheetContainer("assets/tset_player.png");
     player = AOD.SheetRect(sheet, 0, 0, 32, 32);

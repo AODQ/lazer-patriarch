@@ -68,9 +68,15 @@ public:
 
 class Wall : Tile {
 public:
-  this(int x, int y) {
+  this(int x, int y, int id) {
     super(x, y, Tile_Type.Wall, Data.Layer.Floor, false);
-    Set_Sprite(Data.Image.walls[0]);
+    int img = -(id + 100);
+    // -- DEBUG START
+    import std.stdio : writeln;
+    import std.conv : to;
+    writeln("WALL: " ~ to!string(img));
+    // -- DEBUG END
+    Set_Sprite(Data.Image.walls[img]);
   }
   override bool Blocks_Vision() {
     return true;

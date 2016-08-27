@@ -114,7 +114,7 @@ public:
       import std.algorithm;
       import std.algorithm.mutation;
       if ( open_set.length < 3 ) return [];
-      sort!((a,b)=>a.f < b.f)(open_set);
+      /* sort!((a,b)=>a.f < b.f)(open_set); */
 
       cur = open_set[0];
       open_set = open_set[1..$];

@@ -120,7 +120,7 @@ void Generate_Map() {
     }
   }
 
-  void Generate_Horiz(int sx, int sy, int ex) {
+  bool Generate_Horiz(int sx, int sy, int ex, bool ni) {
     if ( ex < sx ) {
       sx ^= ex;
       ex ^= sx;
@@ -135,9 +135,11 @@ void Generate_Map() {
     for ( int i = sx; i != ex; ++ i ) {
       if ( tmap[i][sy] == 0 )
         tmap[i][sy] = -1;
+      else if ( ni ) return false;
     }
+    return true;
   }
-  void Generate_Verti(int sy, int sx, int ey) {
+  bool Generate_Verti(int sy, int sx, int ey, bool ni) {
     if ( ey < sy ) {
       sy ^= ey;
       ey ^= sy;
@@ -152,9 +154,11 @@ void Generate_Map() {
     for ( int i = sy; i != ey+1; ++ i ) {
       if ( tmap[sx][i] == 0 )
         tmap[sx][i] = -1;
+      else if ( ni ) return false;
     }
+    return true;
   }
-  void Generate_Path(int i, int y) {
+  void Generate_Path(int i, int y, bool ni) {
     if ( i == y ) return;
     int srx = trooms_x [ i ] ,
         sry = trooms_y [ i ] ,
@@ -169,17 +173,17 @@ void Generate_Map() {
         fx = cast(int)AOD.R_Rand(erx - erw, erx + erw),
         fy = cast(int)AOD.R_Rand(ery - ery, ery + erh);
     if ( AOD.R_Rand(0, 2) > 1.0f ) { // horiz?
-      Generate_Horiz(srx, sry, erx);
-      Generate_Verti(sry, erx, ery);
+      if ( Generate_Horiz(srx, sry, erx, ni) )
+        Generate_Verti(sry, erx, ery, ni);
     } else {
-      Generate_Verti(sry, srx, ery);
-      Generate_Horiz(srx, ery, erx);
+      if ( Generate_Verti(sry, srx, ery, ni) )
+        Generate_Horiz(srx, ery, erx, ni);
     }
   }
 
   // gen paths
   for ( int i = 0; i < trooms_x.length - 1; ++ i ) {
-    Generate_Path(i, i+1);
+    Generate_Path(i, i+1, false);
   }
   uint rand_paths = cast(int)AOD.R_Rand(trooms_x.length/40,
                                         trooms_x.length/10);
@@ -189,7 +193,7 @@ void Generate_Map() {
       x = cast(int)AOD.R_Rand(1, trooms_x.length);
       y = cast(int)AOD.R_Rand(1, trooms_x.length);
     } while ( x != y );
-    Generate_Path(i, y);
+    Generate_Path(i, y, true);
   }
 
   /* // generate mobs */
@@ -260,22 +264,36 @@ void Generate_Map() {
     tmap[i] = [] ~ tmap[i] ~ [];
   // generate wall
   bool Valid_Wall_Token(int x, int y) {
-    return tmap[x][y] != 0 && tmap[x][y] != -3;
+    return tmap[x][y] != 0 && tmap[x][y] > -100;
   }
   foreach ( i; 0 .. tmap.length ) {
     foreach ( j; 0 .. tmap[i].length ) {
-      if ( tmap[i][j] != 0 ) continue; // empty
-      for ( int ii = i-1; ii != i+2; ++ ii ) {
-        if ( ii == -1 || ii == tmap.length ) continue; // lim
-        for ( int jj = j-1; jj != j+2; ++ jj ) {
-          if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
-          if ( Valid_Wall_Token(ii, jj) ) {
-            tmap[i][j] = -3;
-            goto __NEXT_WALL_GENERATE;
-          }
-        }
-      }
-      __NEXT_WALL_GENERATE:
+      /* if ( tmap[i][j] != 0 ) continue; // empty */
+      /*  [0, 0] [1, 0] [2, 0]
+          [1, 0]        [1, 2]
+          [2, 0] [2, 1] [2, 2]
+
+          0 == nothing, 1 == wall, 2 == floor
+      */
+      /* int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; */
+      /* for ( int ii = i-1; ii != i+2; ++ ii ) { */
+      /*   if ( ii == -1 || ii == tmap.length ) continue; // lim */
+      /*   for ( int jj = j-1; jj != j+2; ++ jj ) { */
+      /*     if ( jj == -1 || jj == tmap[ii].length ) continue; // lim */
+      /*     int ti = ii - i, */
+      /*         tj = jj - j; */
+      /*     if ( tmap[ii][jj] >= 0 ) */
+      /*       surroundings[ti][tj] = 2; */
+      /*     if ( tmap[ii][jj] <= -100 ) */
+      /*       surroundings[ti][tj] = 1; */
+      /*   } */
+      /* } */
+      /* alias M = Data.Image.MapGrid; */
+      // --- corners
+      /* if ( surroundings[2, 1] == 1 && surroundings[1, 2] == 1 ) */
+        /* tmap[i][j] = M.wall_ctl */
+      /* if ( surroundings[2, 1] == 1 && surroundings[1, 2] == 1 ) */
+        /* tmap[i][j] = M.wall_ctl */
     }
   }
 
@@ -292,8 +310,8 @@ void Generate_Map() {
           auto m = tmap[i][j] - 101;
           AOD.Add(new Floor(i, j));
           AOD.Add(new Mob(i, j, m));
-        } else if ( tmap[i][j] == -3 )
-          AOD.Add(new Wall(i, j));
+        } else if ( tmap[i][j] <= -100 )
+          AOD.Add(new Wall(i, j, tmap[i][j]));
         else
           AOD.Add(new Floor(i, j));
       }
