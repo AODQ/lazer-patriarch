@@ -71,10 +71,8 @@ void Generate_Map() {
     tmap[i].length = theight;
   // return true if room valid loc
   bool Room_Intersects(int rx, int ry, int rw, int rh) {
-    int lx = rx - rw,
-        ly = ry - rh,
-        hx = rx + rw,
-        hy = ry + rh;
+    int lx = rx - rw, ly = ry - rh,
+        hx = rx + rw, hy = ry + rh;
     // map boundaries
     if ( lx < 0 ) return false;
     if ( ly < 0 ) return false;
@@ -103,13 +101,11 @@ void Generate_Map() {
       return false;
     for ( int i = rx - rw; i != rx + rw; ++ i ) {
       for ( int j = ry - rh; j != ry + rh; ++ j ) {
-        tmap[i][j] = room_id;
+        tmap[i][j] = -1;
       }
     }
-    trooms_x ~= rx;
-    trooms_y ~= ry;
-    trooms_h ~= rh;
-    trooms_w ~= rw;
+    trooms_x ~= rx; trooms_y ~= ry;
+    trooms_h ~= rh; trooms_w ~= rw;
     return true;
   }
   // gen rooms
@@ -133,8 +129,9 @@ void Generate_Map() {
     /*                        " EX: " ~ to!string(ex)); */
     /* // -- DEBUG END */
     for ( int i = sx; i != ex; ++ i ) {
-      if ( tmap[i][sy] == 0 )
+      if ( tmap[i][sy] == 0 ) {
         tmap[i][sy] = -1;
+      }
       else if ( ni ) return false;
     }
     return true;
@@ -173,11 +170,23 @@ void Generate_Map() {
         fx = cast(int)AOD.R_Rand(erx - erw, erx + erw),
         fy = cast(int)AOD.R_Rand(ery - ery, ery + erh);
     if ( AOD.R_Rand(0, 2) > 1.0f ) { // horiz?
-      if ( Generate_Horiz(srx, sry, erx, ni) )
-        Generate_Verti(sry, erx, ery, ni);
+      Generate_Horiz(srx, sry, erx, ni);
+      Generate_Verti(sry, erx, ery, ni);
+      Generate_Horiz(srx, sry+1, erx, ni);
+      Generate_Verti(sry, erx+1, ery, ni);
+      if ( AOD.R_Rand(0, 50) > 40 ) {
+        Generate_Horiz(srx, sry-1, erx, ni);
+        Generate_Verti(sry, erx-1, ery, ni);
+      }
     } else {
-      if ( Generate_Verti(sry, srx, ery, ni) )
-        Generate_Horiz(srx, ery, erx, ni);
+      Generate_Verti(sry, srx, ery, ni);
+      Generate_Horiz(srx, ery, erx, ni);
+      Generate_Verti(sry, srx+1, ery, ni);
+      Generate_Horiz(srx, ery+1, erx, ni);
+      if ( AOD.R_Rand(0, 50) > 40 ) {
+        Generate_Verti(sry, srx-1, ery, ni);
+        Generate_Horiz(srx, ery-1, erx, ni);
+      }
     }
   }
 
@@ -196,26 +205,6 @@ void Generate_Map() {
     Generate_Path(i, y, true);
   }
 
-  /* // generate mobs */
-  for ( int i = 0; i != trooms_x.length; ++ i ){
-    int amt_mobs = cast(int)AOD.R_Rand(0, trooms_w[i] + trooms_h[i]);
-    int srx = trooms_x [ i   ] ,
-        sry = trooms_y [ i   ] ,
-        srw = trooms_w [ i   ] ,
-        srh = trooms_h [ i   ] ;
-    foreach ( m; 0 .. amt_mobs ) {
-      REGEN_MOB:
-      int mx = cast(int)AOD.R_Rand(srx - srw, srx + srw),
-          my = cast(int)AOD.R_Rand(sry - srh, sry + srh);
-      if ( tmap[mx][my] > 100 ) { // generate 'super' mob
-        if ( cast(int)AOD.R_Rand(0, trooms_w[i] + trooms_h[i]) < 3 ) {
-          tmap[mx][my] += 100;
-        }
-      } else {
-        tmap[mx][my] = cast(int)AOD.R_Rand(101, 126);
-      }
-    }
-  }
   // -- DEBUG START
   import std.stdio;
   import std.conv : to;
@@ -270,32 +259,268 @@ void Generate_Map() {
     foreach ( j; 0 .. tmap[i].length ) {
       /* if ( tmap[i][j] != 0 ) continue; // empty */
       /*  [0, 0] [1, 0] [2, 0]
-          [1, 0]        [1, 2]
-          [2, 0] [2, 1] [2, 2]
+          [0, 1]        [2, 1]
+          [0, 2] [1, 2] [2, 2]
 
-          0 == nothing, 1 == wall, 2 == floor
+          0 == nothing, 1 == floor
       */
-      /* int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; */
-      /* for ( int ii = i-1; ii != i+2; ++ ii ) { */
-      /*   if ( ii == -1 || ii == tmap.length ) continue; // lim */
-      /*   for ( int jj = j-1; jj != j+2; ++ jj ) { */
-      /*     if ( jj == -1 || jj == tmap[ii].length ) continue; // lim */
-      /*     int ti = ii - i, */
-      /*         tj = jj - j; */
-      /*     if ( tmap[ii][jj] >= 0 ) */
-      /*       surroundings[ti][tj] = 2; */
-      /*     if ( tmap[ii][jj] <= -100 ) */
-      /*       surroundings[ti][tj] = 1; */
-      /*   } */
-      /* } */
-      /* alias M = Data.Image.MapGrid; */
-      // --- corners
-      /* if ( surroundings[2, 1] == 1 && surroundings[1, 2] == 1 ) */
-        /* tmap[i][j] = M.wall_ctl */
-      /* if ( surroundings[2, 1] == 1 && surroundings[1, 2] == 1 ) */
-        /* tmap[i][j] = M.wall_ctl */
+      if ( tmap[i][j] != 0 ) continue;
+      int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      for ( int ii = i-1; ii != i+2; ++ ii ) {
+        if ( ii == -1 || ii == tmap.length ) continue; // lim
+        for ( int jj = j-1; jj != j+2; ++ jj ) {
+          if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
+          int ti = ii - i+1,
+              tj = jj - j+1;
+          if ( tmap[ii][jj] == -1 )
+            surroundings[ti][tj] = 1;
+        }
+      }
+      static import Data;
+      alias M = Data.Image.MapGrid;
+      /* // --- corners */
+      auto s = surroundings;
+      /* if ( !s[2][1] && !s[1][2] && s[2][2] ) tmap[i][j] = M.wall_ctl; */
+      /* if ( !s[2][1] && !s[1][2] && s[2][0] ) tmap[i][j] = M.wall_ctr; */
+      /* if ( !s[1][1] && !s[1][2] && s[0][2] ) tmap[i][j] = M.wall_cll; */
+      /* if ( !s[1][0] && !s[1][1] && s[0][0] ) tmap[i][j] = M.wall_clr; */
+      // --- | - walls
+      if ( tmap[i][j] > -100 ) {
+        if ( s[1][0] ) {
+          if ( !s[0][1] && !s[2][1] )
+            tmap[i][j] = M.wall_t;
+        }
+        if ( s[1][2] ) {
+          if ( !s[0][1] && !s[2][1] )
+            tmap[i][j] = M.brick;
+        }
+        if ( s[2][1] ) {
+          if ( !s[1][0] && !s[1][2] )
+            tmap[i][j] = M.wall_r;
+        }
+        if ( s[0][1] ) {
+          if ( !(s[1][0] || s[1][2]) )
+            tmap[i][j] = M.wall_l;
+        }
+        /* if ( s[2][2] && !s[2][1] && !s[1][2] ) tmap[i][j] = M.wall_ctl; */
+        /* if ( s[0][2] && !s[0][1] && !s[1][2] ) tmap[i][j] = M.wall_ctr; */
+        if ( s[0][0] && !s[0][1] && !s[1][0] ) tmap[i][j] = M.wall_clr;
+        if ( s[2][0] && !s[1][0] && !s[2][1] ) tmap[i][j] = M.wall_cll;
+        if ( s[0][1] && s[1][2] )              tmap[i][j] = M.brick_l;
+        if ( s[0][1] && s[1][0] )              tmap[i][j] = M.wall_ptl;
+        if ( s[2][1] && s[1][0] )              tmap[i][j] = M.wall_ptr;
+        if ( s[2][1] && s[1][2] )              tmap[i][j] = M.brick_r;
+      }
     }
   }
+  // --- second passthrough
+  foreach ( i; 0 .. tmap.length ) {
+    foreach ( j; 0 .. tmap[i].length ) {
+      /*  [0, 0] [1, 0] [2, 0]
+          [0, 1]        [2, 1]
+          [0, 2] [1, 2] [2, 2]
+
+          0 == nothing, 1 == floor, otherwise M
+      */
+      int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      for ( int ii = i-1; ii != i+2; ++ ii ) {
+        if ( ii == -1 || ii == tmap.length ) continue; // lim
+        for ( int jj = j-1; jj != j+2; ++ jj ) {
+          if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
+          int ti = ii - i+1,
+              tj = jj - j+1;
+          if ( tmap[ii][jj] == -1 )
+            surroundings[ti][tj] = 1;
+          if ( tmap[ii][jj] <= -100 )
+            surroundings[ti][tj] = tmap[ii][jj];
+        }
+      }
+      static import Data;
+      alias M = Data.Image.MapGrid;
+      auto s = surroundings;
+
+      /* if ( */ 
+
+      // corner outside of wall
+      if ( s[1][2] == M.brick_l ) {
+        tmap[i][j] = M.wall_pll; continue;
+      }
+      if ( s[1][2] == M.wall_plr ) {
+        tmap[i][j] = M.brick; continue;
+      }
+
+      bool Is_Brick(int x) {
+        return x == M.brick || x == M.brick_r || x == M.brick_l;
+      }
+      if ( tmap[i][j] != M.brick && tmap[i][j] != M.brick_r
+                                 && tmap[i][j] != M.brick_l ) {
+        if ( Is_Brick(s[0][1]) ) {
+          if ( tmap[i][j] != -1 )
+            tmap[i][j] = M.wall_l;
+        }
+        if ( Is_Brick(s[2][1])) {
+          if ( tmap[i][j] != -1 )
+            tmap[i][j] = M.wall_r;
+        }
+      }
+
+      if ( tmap[i][j] == 0 ) {
+        // corner inside of wall
+        if ( s[2][2] == M.brick && s[0][1] != 1 && s[1][2] != M.brick ) {
+          tmap[i][j] = M.wall_ctl; continue;
+        }
+        if ( s[0][2] == M.brick && s[2][1] != 1 && s[1][2] != M.brick ) {
+          tmap[i][j] = M.wall_ctr; continue;
+        }
+        if ( s[2][0] == M.brick && s[0][1] != 1  && s[1][0] != M.brick ) {
+          tmap[i][j] = M.wall_cll; continue;
+        }
+        if ( s[0][0] == M.brick && s[2][1] != 1 && s[1][0] != M.brick ) {
+          tmap[i][j] = M.wall_clr; continue;
+        }
+        // top of wall
+        if ( s[1][2] == M.brick ) {
+          tmap[i][j] = M.wall_b; continue;
+        }
+      }
+    }
+  }
+
+  // ------- third pass through { halls }
+
+  foreach ( i; 0 .. tmap.length ) {
+    foreach ( j; 0 .. tmap[i].length ) {
+      /*  [0, 0] [1, 0] [2, 0]
+          [0, 1]        [2, 1]
+          [0, 2] [1, 2] [2, 2]
+
+          0 == nothing, 1 == floor, otherwise M
+      */
+      int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      for ( int ii = i-1; ii != i+2; ++ ii ) {
+        if ( ii == -1 || ii == tmap.length ) continue; // lim
+        for ( int jj = j-1; jj != j+2; ++ jj ) {
+          if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
+          int ti = ii - i+1,
+              tj = jj - j+1;
+          if ( tmap[ii][jj] == -1 )
+            surroundings[ti][tj] = 1;
+          if ( tmap[ii][jj] <= -100 )
+            surroundings[ti][tj] = tmap[ii][jj];
+        }
+      }
+      static import Data;
+      alias M = Data.Image.MapGrid;
+      auto s = surroundings;
+      if ( tmap[i][j] < -101 ) {
+        if ( (s[1][0] == 1 && s[1][2] == 1) ) {
+          tmap[i][j] = M.hall_horiz;
+          if ( s[0][1] == 1 )
+            tmap[i][j] = M.hall_capl;
+          if ( s[2][1] == 1 )
+            tmap[i][j] = M.hall_capr;
+        }
+        if ( (s[0][1] == 1 && s[2][1] == 1) ){
+          tmap[i][j] = M.hall_vert;
+          if ( s[1][0] == 1 )
+            tmap[i][j] = M.hall_capd;
+          if ( s[1][2] == 1 )
+            tmap[i][j] = M.hall_capu;
+        }
+      }
+    }
+  }
+
+
+  // ------- fourth pass through { floors }
+  foreach ( i; 0 .. tmap.length ) {
+    foreach ( j; 0 .. tmap[i].length ) {
+      /*  [0, 0] [1, 0] [2, 0]
+          [0, 1]        [2, 1]
+          [0, 2] [1, 2] [2, 2]
+
+          0 == nothing, 1 == floor, otherwise M
+      */
+      int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      for ( int ii = i-1; ii != i+2; ++ ii ) {
+        if ( ii == -1 || ii == tmap.length ) continue; // lim
+        for ( int jj = j-1; jj != j+2; ++ jj ) {
+          if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
+          int ti = ii - i+1,
+              tj = jj - j+1;
+          if ( tmap[ii][jj] == -1 )
+            surroundings[ti][tj] = 1;
+          if ( tmap[ii][jj] <= -100 )
+            surroundings[ti][tj] = tmap[ii][jj];
+        }
+      }
+
+      bool Is_Wall(int x) {
+        return x <= -100 && x >= -150;
+      }
+
+      static import Data;
+      alias M = Data.Image.MapGrid;
+      auto s = surroundings;
+      if ( tmap[i][j] == -1 ) {
+        tmap[i][j] = M.floor;
+        // -- uld
+        if ( Is_Wall(s[0][1]) ) tmap[i][j] = M.floor_left;
+        if ( Is_Wall(s[2][1]) ) tmap[i][j] = M.floor_right;
+        if ( Is_Wall(s[1][0]) ) tmap[i][j] = M.floor_up;
+        /* if ( Is_Wall(s[1][2]) ) tmap[i][j] = M.floor_down; */
+        // -- vertic/horiz
+        if ( Is_Wall(s[0][1]) && Is_Wall(s[2][1]) )
+          tmap[i][j] = M.floor_vert;
+        if ( Is_Wall(s[1][0]) && Is_Wall(s[1][2]) )
+          tmap[i][j] = M.floor_horiz;
+        // -- corner
+        if ( Is_Wall(s[0][0]) && Is_Wall(s[1][0]) && Is_Wall(s[0][1]) )
+          tmap[i][j] = M.floor_tl;
+        if ( Is_Wall(s[2][0]) && Is_Wall(s[1][0]) && Is_Wall(s[2][1]) )
+          tmap[i][j] = M.floor_tr;
+        /* if ( Is_Wall(s[0][2]) && Is_Wall(s[0][1]) && Is_Wall(s[1][2]) ) */
+        /*   tmap[i][j] = M.floor_ll; */
+        /* if ( Is_Wall(s[2][2]) && Is_Wall(s[1][2]) && Is_Wall(s[2][1]) ) */
+        /*   tmap[i][j] = M.floor_lr; */
+        // -- shadow corner
+        if ( Is_Wall(s[0][0]) && !Is_Wall(s[1][0]) && !Is_Wall(s[0][1]) )
+          tmap[i][j] = M.floor_slr;
+        if ( Is_Wall(s[2][0]) && !Is_Wall(s[1][0]) && !Is_Wall(s[2][1]) )
+          tmap[i][j] = M.floor_sll;
+        /* if ( Is_Wall(s[0][2]) && !Is_Wall(s[0][1]) && !Is_Wall(s[1][2]) ) */
+        /*   tmap[i][j] = M.floor_str; */
+        /* if ( Is_Wall(s[2][2]) && !Is_Wall(s[1][2]) && !Is_Wall(s[2][1]) ) */
+        /*   tmap[i][j] = M.floor_stl; */
+
+        if ( Is_Wall(s[0][1]) && !Is_Wall(s[0][0]) )
+          tmap[i][j] = M.floor_str;
+        if ( Is_Wall(s[2][1]) && !Is_Wall(s[2][0]) )
+          tmap[i][j] = M.floor_stl;
+      }
+    }
+  }
+
+  /* /1* // generate mobs *1/ */
+  /* for ( int i = 0; i != trooms_x.length; ++ i ){ */
+  /*   int amt_mobs = cast(int)AOD.R_Rand(0, trooms_w[i] + trooms_h[i]); */
+  /*   int srx = trooms_x [ i   ] , */
+  /*       sry = trooms_y [ i   ] , */
+  /*       srw = trooms_w [ i   ] , */
+  /*       srh = trooms_h [ i   ] ; */
+  /*   foreach ( m; 0 .. amt_mobs ) { */
+  /*     REGEN_MOB: */
+  /*     int mx = cast(int)AOD.R_Rand(srx - srw, srx + srw), */
+  /*         my = cast(int)AOD.R_Rand(sry - srh, sry + srh); */
+  /*     if ( tmap[mx][my] > 100 ) { // generate 'super' mob */
+  /*       if ( cast(int)AOD.R_Rand(0, trooms_w[i] + trooms_h[i]) < 3 ) { */
+  /*         tmap[mx][my] += 100; */
+  /*       } */
+  /*     } else { */
+  /*       tmap[mx][my] = cast(int)AOD.R_Rand(101, 126); */
+  /*     } */
+  /*   } */
+  /* } */
 
   map_width = tmap.length;
   map_height = tmap[0].length;
@@ -307,13 +532,15 @@ void Generate_Map() {
     foreach ( j; 0 .. tmap[0].length ) {
       if ( tmap[i][j] != 0 ) {
         if ( tmap[i][j] > 100 ) {
-          auto m = tmap[i][j] - 101;
-          AOD.Add(new Floor(i, j));
-          AOD.Add(new Mob(i, j, m));
-        } else if ( tmap[i][j] <= -100 )
-          AOD.Add(new Wall(i, j, tmap[i][j]));
-        else
-          AOD.Add(new Floor(i, j));
+          /* auto m = tmap[i][j] - 101; */
+          /* AOD.Add(new Floor(i, j)); */
+          /* AOD.Add(new Mob(i, j, m)); */
+        } else if ( tmap[i][j] <= -100 ) {
+          if ( tmap[i][j] > -200 )
+            AOD.Add(new Wall(i, j, tmap[i][j]));
+          else
+            AOD.Add(new Floor(i, j, tmap[i][j]));
+        }
       }
     }
   }
@@ -325,6 +552,22 @@ void Generate_Map() {
     shadows[i] = new Entity.Map.Black(0, 0);
     AOD.Add(shadows[i]);
   }
+  // props
+  int charger = cast(int)AOD.R_Rand(0, 10);
+  foreach ( i; 0 .. map.length ) { // Fifth pass through ( props )
+    foreach ( j; 0 .. map[i].length ) {
+      if ( map[i][j].length == 0 ) continue;
+      if ( map[i][j][$-1].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) {
+        if ( AOD.R_Rand(0, 100) > 50 && charger < 10 ) ++ charger;
+        if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 160 ) {
+          charger = 0;
+          AOD.Add(new Entity.Map.Prop(i, j));
+        }
+      }
+    }
+  }
+
+
 }
 
 void Update() {

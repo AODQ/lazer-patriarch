@@ -7,7 +7,7 @@ enum Tile_Type {
   Nil, Floor, Wall, Player, Mob
 }
 
-class Tile : AOD.Entity {
+class Tile : AOD.PolyEntity {
   int tile_x, tile_y;
   bool can_be_stepped_on;
   Tile_Type tile_type;
@@ -21,6 +21,7 @@ public:
     tile_y = y;
     Set_Position(tile_x*32 + 16, tile_y*32 + 16);
     Set_Image_Size(AOD.Vector(32, 32));
+    Set_Size(32, 32);
   }
   override void Added_To_Realm() {
     import Game_Manager : map;
@@ -57,12 +58,22 @@ public:
     return false;
   }
 }
+class Prop : Tile {
+public:
+  this(int x, int y) {
+    super(x, y, Tile_Type.Floor, Data.Layer.Item);
+    Set_Sprite(Data.Image.props[cast(int)AOD.R_Rand(0, $)]);
+  }
+}
 
 class Floor : Tile {
 public:
-  this(int x, int y) {
+  this(int x, int y, int id) {
     super(x, y, Tile_Type.Floor);
-    Set_Sprite(Data.Image.floors[0]);
+    int img = -(id + 200);
+    Set_Sprite(Data.Image.floors[img]);
+    if ( id == cast(int)Data.Image.MapGrid.floor_horiz ) {
+    }
   }
 }
 
@@ -71,11 +82,11 @@ public:
   this(int x, int y, int id) {
     super(x, y, Tile_Type.Wall, Data.Layer.Floor, false);
     int img = -(id + 100);
-    // -- DEBUG START
-    import std.stdio : writeln;
-    import std.conv : to;
-    writeln("WALL: " ~ to!string(img));
-    // -- DEBUG END
+    /* // -- DEBUG START */
+    /* import std.stdio : writeln; */
+    /* import std.conv : to; */
+    /* writeln("WALL: " ~ to!string(img)); */
+    /* // -- DEBUG END */
     Set_Sprite(Data.Image.walls[img]);
   }
   override bool Blocks_Vision() {

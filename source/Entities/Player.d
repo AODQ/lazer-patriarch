@@ -11,6 +11,11 @@ public:
   this(int x, int y) {
     static import Data;
     super(x, y, Entity.Map.Tile_Type.Player, Data.Layer.Player, false);
+    // -- DEBUG START
+    import std.stdio : writeln;
+    import std.conv : to;
+    writeln(to!string(tile_type));
+    // -- DEBUG END
     Set_Sprite(Data.Image.player);
   }
   override void Update() {
@@ -77,7 +82,7 @@ public:
     }
   }
   override void Post_Update() {
-    Set_Position(tile_x*32 + 16, tile_y*32 + 16);
+    Set_Position(tile_x*32 + 16, tile_y*32);
     static immutable(float) window_width  = 595,
                             window_height = 395;
     AOD.Camera.Set_Position(R_Position() - AOD.Vector(window_width /2 + 4,

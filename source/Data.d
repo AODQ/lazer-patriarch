@@ -56,34 +56,59 @@ auto Construct_New_Menu() {
 class Image {
 public: static:
   enum MapGrid {
+    // ---- wall
     wall_ctl = -100, wall_ctr = -101, wall_cll = -102, wall_clr = -103,
 
+    wall_b = -104, wall_l = -105, wall_r = -106, wall_t = -107,
 
-    floor_topleft = -108, floor_top = -109, floor_topright = -110,
-    floor_left = -111,              floor_right = -112,
-    floor_botleft = -113, floor_bot = -114, floor_botright = -115,
+    wall_ptl = -108, wall_ptr = -109, wall_pll = -110, wall_plr = -111,
+
+    brick = -112, brick_l = -113, brick_r = -114,
+
+    hall_vert = -115, hall_horiz = -116, hall_capl = -117, hall_capr = -118,
+    hall_capu = -119, hall_capd  = -120,
+
+    // ---- floor
+    floor = -200, floor_left = -201, floor_right = -202, floor_up = -203,
+    floor_down = -204,
+
+    floor_tl = -205, floor_tr = -206, floor_ll = -207, floor_lr = -208,
+
+    floor_stl = -209, floor_str = -210, floor_sll = -211, floor_slr = -212,
+
+    floor_vert = -213, floor_horiz = -214
   };
   AOD.SheetRect[] walls,
                   floors,
-                  mobs;
+                  mobs,
+                  props;
   AOD.SheetRect black;
   AOD.SheetRect player;
   AOD.SheetContainer HUD, projectile;
   void Initialize() {
     auto sheet = AOD.SheetContainer("assets/tset_wall.png");
+    auto Gen_SR(int x, int y) {
+      return AOD.SheetRect(sheet, x*32, y*32, x*32 + 33, y*32 + 33);
+    }
     walls = [
-      AOD.SheetRect(sheet, 3*32,    0, 3*32 + 32,        32), // tl
-      AOD.SheetRect(sheet,   32, 3*32,   32 + 32, 3*32 + 32), // t
-      AOD.SheetRect(sheet, 4*32,    0, 4*32 + 32,        32), // tr
-      AOD.SheetRect(sheet, 2*32,   32, 2*32 + 32,   32 + 32), // l
-      AOD.SheetRect(sheet,    0,   32,   32 + 32,   32 + 32), // r
-      AOD.SheetRect(sheet, 3*32,   32, 3*32 + 32,   32 + 32), // bl
-      AOD.SheetRect(sheet,   32,    0,   32 + 32,        32), // b
-      AOD.SheetRect(sheet, 2*32,    0,   32 + 32,        32)  // br
-
+      Gen_SR(3, 0), Gen_SR(4, 0), Gen_SR(3, 1), Gen_SR(4, 1), // corners
+      Gen_SR(1, 2), Gen_SR(0, 1), Gen_SR(2, 1), Gen_SR(1, 0), // walls
+      Gen_SR(0, 0), Gen_SR(2, 0), Gen_SR(0, 2), Gen_SR(2, 2), // pokers
+      Gen_SR(7, 1), Gen_SR(6, 1), Gen_SR(8, 1), // bricks
+      Gen_SR(0, 4), Gen_SR(2, 5), Gen_SR(3, 5), Gen_SR(4, 1),  // hall
+      Gen_SR(0, 5), Gen_SR(0, 5)                               // hall
     ];
+    sheet = AOD.SheetContainer("assets/tset_props.png");
+    props = [
+      Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),
+      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1)
+    ];
+    sheet = AOD.SheetContainer("assets/tset_floor.png");
     floors = [
-      AOD.SheetRect(sheet, 32, 5*32, 64, 5*32+32)
+      Gen_SR(1, 1), Gen_SR(0, 1), Gen_SR(2, 1), Gen_SR(1, 0), Gen_SR(1, 2),//fl
+      Gen_SR(0, 0), Gen_SR(2, 0), Gen_SR(0, 2), Gen_SR(2, 2), // corner
+      Gen_SR(3, 0), Gen_SR(4, 0), Gen_SR(3, 1), Gen_SR(4, 1), // shadow
+      Gen_SR(0, 4), Gen_SR(5, 3)
     ];
     sheet = AOD.SheetContainer("assets/tset_player.png");
     player = AOD.SheetRect(sheet, 0, 0, 32, 32);
