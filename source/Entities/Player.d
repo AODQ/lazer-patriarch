@@ -4,9 +4,11 @@ static import Entity.Map;
 static import Game_Manager;
 
 class Player : Entity.Map.Tile {
-  bool key_left, key_right, key_up, key_down;
+  bool key_left, key_right, key_up, key_down, key_grab;
   float walk_timer = 0, shoot_timer = 0;
   immutable(float) Walk_timer_start = 10;
+  Entity.Prop.Block grabbed;
+  AOD.Animation shoot_anim; 
 public:
   this(int x, int y) {
     static import Data;
@@ -19,7 +21,7 @@ public:
     Set_Sprite(Data.Image.player);
   }
   override void Update() {
-    key_left = key_right = key_up = key_down = false;
+    key_left = key_right = key_up = key_down = key_grab = false;
     foreach ( k; AOD.ClientVars.keybinds ) {
       if ( AOD.Input.keystate[ k.key ] ) {
         switch ( k.command ) {
@@ -28,6 +30,7 @@ public:
           case "down"  : key_down  = true; break;
           case "left"  : key_left  = true; break;
           case "right" : key_right = true; break;
+          case "grab"  : key_grab  = true; break;
         }
       }
     }
