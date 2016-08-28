@@ -552,9 +552,12 @@ void Generate_Map() {
           /* AOD.Add(new Floor(i, j)); */
           /* AOD.Add(new Mob(i, j, m)); */
         } else if ( tmap[i][j] <= -100 ) {
-          if ( tmap[i][j] > -200 )
-            AOD.Add(new Wall( cast(int) i, cast(int) j, tmap[i][j]));
-          else
+          if ( tmap[i][j] > -200 ) {
+            if ( j != 0 && tmap[i][j-1] <= -200 ) {
+              AOD.Add(new Wall( cast(int) i, cast(int) j, tmap[i][j], true));
+            } else
+              AOD.Add(new Wall( cast(int) i, cast(int) j, tmap[i][j], false));
+          } else
             AOD.Add(new Floor( cast(int) i, cast(int) j, tmap[i][j]));
         }
       }
@@ -585,9 +588,12 @@ void Generate_Map() {
         if ( AOD.R_Rand(0, 100) > 90 && charger < 10 ) ++ charger;
         if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 195 ) {
           charger = 0;
-          if ( AOD.R_Rand(0, 100) > 40 )
-            AOD.Add(new Entity.Map.Prop( cast(int)i, cast(int)j,
-                                               Prop.Type.Moss));
+          if ( i < map.length && j < map[i].length &&
+               map[i][j].length > 0 && map[i][j+1].length > 0)
+            if ( map[i][j][0].R_Tile_Type == Entity.Map.Tile_Type.Wall &&
+                 map[i][j+1][0].R_Tile_Type == Entity.Map.Tile_Type.Floor )
+              AOD.Add(new Entity.Map.Prop( cast(int)i, cast(int)j,
+                                                 Prop.Type.Moss));
         }
       }
     }

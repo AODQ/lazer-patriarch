@@ -3,6 +3,7 @@ static import AOD;
 
 enum Layer {
   UI = 30,
+  Front_Wall = 31,
   Front_Prop = 32,
   Player = 33,
   Black  = 34,
@@ -102,8 +103,8 @@ public: static:
     props = [
       Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),
       Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),
-      Gen_SR(4, 0), Gen_SR(5, 0), Gen_SR(4, 1), Gen_SR(1, 4),
-      Gen_SR(1, 5), Gen_SR(3, 2), Gen_SR(3, 3), Gen_SR(0, 2),
+      Gen_SR(4, 0), Gen_SR(5, 0), Gen_SR(4, 1), Gen_SR(1, 3),
+      Gen_SR(1, 4), Gen_SR(3, 2), Gen_SR(3, 3), Gen_SR(0, 2),
       Gen_SR(0, 3), Gen_SR(0, 4), Gen_SR(2, 2), Gen_SR(2, 3)
     ];
     sheet = AOD.SheetContainer("assets/tset_floor.png");

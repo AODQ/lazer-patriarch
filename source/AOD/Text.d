@@ -222,7 +222,7 @@ public:
       _layer = layer
   */
   this(int pos_x, int pos_y, string str_, ubyte _layer = 4) {
-    this(Vector(pos_x, pos_y), str_, _layer);
+    /* this(Vector(pos_x, pos_y), str_, _layer); */
   }
 
   /**
@@ -232,10 +232,10 @@ public:
       _layer = layer
   */
   this(Vector pos, string str_, ubyte _layer = 4) {
-    super(_layer, Render_Base.Render_Base_Type.Text);
-    position = pos;
-    static_position = true;
-    Redefault(str_);
+    /* super(_layer, Render_Base.Render_Base_Type.Text); */
+    /* position = pos; */
+    /* static_position = true; */
+    /* Redefault(str_); */
   }
   /** Sets message to be rendered */
   void Set_String(string str_) {
@@ -245,24 +245,25 @@ public:
   @disable void Set_Colour(int r, int g, int b) { }
   /** Sets font to default font */
   void Set_To_Default() {
-    uses_default_font = 1;
-    if ( default_font != "" )
-      Refresh_Message();
+    /* uses_default_font = 1; */
+    /* if ( default_font != "" ) */
+    /*   Refresh_Message(); */
   }
 
   /** Sets current font used by this text */
   void Set_Font(string str, int pt_siz) {
-    Load_Font(str, pt_size);
-    font = str;
-    pt_size = pt_siz;
-    uses_default_font = 0;
-    Refresh_Message();
+    /* Load_Font(str, pt_size); */
+    /* font = str; */
+    /* pt_size = pt_siz; */
+    /* uses_default_font = 0; */
+    /* Refresh_Message(); */
   }
 
   /** Returns: String of the font (file location)*/
   string R_Font()     {
-    if ( ft_font is null ) return default_font;
-    else                   return font;
+    return "";
+    /* if ( ft_font is null ) return default_font; */
+    /* else                   return font; */
   }
   /** Returns: The Font object */
   ref TextEng.Font R_FT_Font() { return ft_font; }
@@ -276,9 +277,9 @@ Params:
   pt_size = point size of the font
   */
   static void Set_Default_Font(string str, int pt_siz) {
-    Load_Font(str, pt_siz);
-    default_font = str;
-    default_pt_size = pt_siz;
+    /* Load_Font(str, pt_siz); */
+    /* default_font = str; */
+    /* default_pt_size = pt_siz; */
   }
   /** */
   static string R_Default_Font() { return default_font; }
@@ -288,14 +289,14 @@ Params:
   override void Update() {}
   override void Post_Update() {}
   override void Render() {
-    Vector pos = R_Position(true);
-    if ( R_Visible && R_FT_Font ) {
-      glPushMatrix();
-        glTranslatef(position.x, position.y, 0);
-        glListBase(ft_font.R_Character_List);
-        glCallLists(cast(int)msg.length, GL_UNSIGNED_BYTE, msg.ptr);
-      glPopMatrix();
-    }
+    /* Vector pos = R_Position(true); */
+    /* if ( R_Visible && R_FT_Font ) { */
+      /* glPushMatrix(); */
+      /*   glTranslatef(position.x, position.y, 0); */
+      /*   glListBase(ft_font.R_Character_List); */
+      /*   glCallLists(cast(int)msg.length, GL_UNSIGNED_BYTE, msg.ptr); */
+      /* glPopMatrix(); */
+    /* } */
   }
 }
 

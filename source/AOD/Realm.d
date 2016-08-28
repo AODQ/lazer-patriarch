@@ -117,11 +117,11 @@ public:
     mixin(Load_Library!("DerelictILUT"      ,""));
     mixin(Load_Library!("DerelictAL"        ,""));
     version (linux) {
-      mixin(Load_Library!("DerelictFT"        , ""));
+      /* mixin(Load_Library!("DerelictFT"        , "")); */
       mixin(Load_Library!("DerelictVorbis"    , ""));
       mixin(Load_Library!("DerelictVorbisFile", ""));
     } else {
-      mixin(Load_Library!("DerelictFT"        ,"\"freetype265.dll\""));
+      /* mixin(Load_Library!("DerelictFT"        ,"\"freetype265.dll\"")); */
       mixin(Load_Library!("DerelictVorbis"    ,"\"libvorbis-0.dll\""));
       mixin(Load_Library!("DerelictVorbisFile","\"libvorbisfile-3.dll\""));
     }
@@ -209,7 +209,7 @@ public:
       writeln("Initializing Sounds Core");
       SoundEng.Set_Up();
       writeln("Initializing Font Core");
-      TextEng.Font.Init();
+      /* TextEng.Font.Init(); */
       /* objs_to_rem = []; */
       /* bg_red   = 0; */
       /* bg_blue  = 0; */

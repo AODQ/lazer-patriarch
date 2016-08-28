@@ -84,10 +84,10 @@ public:
       prop_tex = cast(int)AOD.R_Rand(0, 7);
     }
     if (prop == Type.Closed_Door || prop == Type.Rock ||
-        prop == Type.Block_Bot )
+        prop == Type.Block_Bot || prop == Type.Tree_Bot )
       super(x, y, Tile_Type.Prop, Data.Layer.Item, false);
     else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
-              prop == Type.Tree_Bot || prop == Type.Block_Top )
+              prop == Type.Block_Top )
       super(x, y, Tile_Type.Prop, Data.Layer.Front_Prop);
     else
       super(x, y, Tile_Type.Prop, Data.Layer.Item);
@@ -109,8 +109,9 @@ public:
 
 class Wall : Tile {
 public:
-  this(int x, int y, int id) {
-    super(x, y, Tile_Type.Wall, Data.Layer.Floor, false);
+  this(int x, int y, int id, bool passable) {
+    super(x, y, Tile_Type.Wall,
+              passable?Data.Layer.Front_Wall:Data.Layer.Floor, passable);
     int img = -(id + 100);
     /* // -- DEBUG START */
     /* import std.stdio : writeln; */
@@ -122,11 +123,6 @@ public:
       Flip_Y();
     }
     if ( id == Data.Image.MapGrid.hall_capr ) {
-      // -- DEBUG START
-      import std.stdio : writeln;
-      import std.conv : to;
-      writeln("FLIP: " ~ R_Flipped_Y());
-      // -- DEBUG END
       Flip_X();
     }
     if ( id == Data.Image.MapGrid.floor_splittr )
