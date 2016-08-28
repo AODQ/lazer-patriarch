@@ -111,9 +111,9 @@ public: static:
     ];
     sheet = AOD.SheetContainer("assets/tset_player.png");
     player = AOD.SheetRect(sheet, 0, 0, 32, 32);
+    black = AOD.SheetRect(sheet, 32, 0, 64, 32);
     HUD = AOD.SheetContainer("assets/HUD.png");
     sheet = AOD.SheetContainer("assets/tset_mob.png");
-    black = walls[1];
     projectile = AOD.SheetContainer("assets/projectile.png");
     mobs = [
       AOD.SheetRect(sheet , 0   , 0 , 32  , 32) ,
