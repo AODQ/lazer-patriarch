@@ -538,10 +538,11 @@ void Generate_Map() {
   // -------------- generate graphix map ---------------------------------------
   import Entity.Map, Entity.Mob;
   map.length = tmap.length;
-  foreach ( i; 0 .. tmap.length ) {
+  foreach ( i; 0 .. tmap.length) {
     map[i].length = tmap[0].length;
-    foreach ( j; 0 .. tmap[0].length ) {
-      if ( tmap[i][j] != 0 ) {
+    foreach ( j;0 .. tmap[0].length ) {
+      if ( tmap[i][j] != 0 && i>0 && i<tmap.length-1
+                           && j>0 && j<tmap[i].length-1) {
         if ( tmap[i][j] > 100 ) {
           /* auto m = tmap[i][j] - 101; */
           /* AOD.Add(new Floor(i, j)); */
