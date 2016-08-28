@@ -18,7 +18,7 @@ public:
       m -= 100;
       Set_Colour(0.3, 0.3, 0.3, 1);
     }
-    if ( m > Data.Image.mobs.length ) m = Data.Image.mobs.length-1;
+    if ( m > Data.Image.mobs.length ) m = cast(int) Data.Image.mobs.length-1;
     Set_Sprite(Data.Image.mobs[m]);
     think_timer = cast(int)AOD.R_Rand(0, Think_timer_start_max);
   }
