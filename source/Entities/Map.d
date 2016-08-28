@@ -37,7 +37,7 @@ public:
     import Game_Manager : map;
     foreach ( i; 0 .. map[ox][oy].length )
       if ( map[ox][oy][i] is this ) {
-        map[ox][oy] = AOD.Util.Remove(map[ox][oy], i);
+        map[ox][oy] = AOD.Util.Remove(map[ox][oy], cast(int) i);
       }
     /* if ( map[ox][oy].length != 0 ) */
     /*   map[ox][oy][$-1].Set_Visible(true); */

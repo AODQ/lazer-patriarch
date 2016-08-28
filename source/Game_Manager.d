@@ -266,12 +266,12 @@ void Generate_Map() {
       */
       if ( tmap[i][j] != 0 ) continue;
       int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-      for ( int ii = i-1; ii != i+2; ++ ii ) {
+      for ( int ii = cast(int) i-1; ii != i+2; ++ ii ) {
         if ( ii == -1 || ii == tmap.length ) continue; // lim
-        for ( int jj = j-1; jj != j+2; ++ jj ) {
+        for ( int jj = cast(int) j-1; jj != j+2; ++ jj ) {
           if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
-          int ti = ii - i+1,
-              tj = jj - j+1;
+          int ti = ii - cast(int) i+1,
+              tj = jj - cast(int) j+1;
           if ( tmap[ii][jj] == -1 )
             surroundings[ti][tj] = 1;
         }
@@ -323,12 +323,12 @@ void Generate_Map() {
           0 == nothing, 1 == floor, otherwise M
       */
       int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-      for ( int ii = i-1; ii != i+2; ++ ii ) {
+      for ( int ii = cast(int) i-1; ii != i+2; ++ ii ) {
         if ( ii == -1 || ii == tmap.length ) continue; // lim
-        for ( int jj = j-1; jj != j+2; ++ jj ) {
+        for ( int jj = cast(int) j-1; jj != j+2; ++ jj ) {
           if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
-          int ti = ii - i+1,
-              tj = jj - j+1;
+          int ti = ii - cast(int) i+1,
+              tj = cast(int) jj - cast(int) j+1;
           if ( tmap[ii][jj] == -1 )
             surroundings[ti][tj] = 1;
           if ( tmap[ii][jj] <= -100 )
@@ -397,12 +397,12 @@ void Generate_Map() {
           0 == nothing, 1 == floor, otherwise M
       */
       int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-      for ( int ii = i-1; ii != i+2; ++ ii ) {
+      for ( int ii = cast(int) i-1; ii != i+2; ++ ii ) {
         if ( ii == -1 || ii == tmap.length ) continue; // lim
-        for ( int jj = j-1; jj != j+2; ++ jj ) {
+        for ( int jj = cast(int) j-1; jj != j+2; ++ jj ) {
           if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
-          int ti = ii - i+1,
-              tj = jj - j+1;
+          int ti = ii - cast(int) i+1,
+              tj = jj - cast(int) j+1;
           if ( tmap[ii][jj] == -1 )
             surroundings[ti][tj] = 1;
           if ( tmap[ii][jj] <= -100 )
@@ -442,12 +442,12 @@ void Generate_Map() {
           0 == nothing, 1 == floor, otherwise M
       */
       int[3][3] surroundings = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-      for ( int ii = i-1; ii != i+2; ++ ii ) {
+      for ( int ii = cast(int) i-1; ii != cast(int) i+2; ++ ii ) {
         if ( ii == -1 || ii == tmap.length ) continue; // lim
-        for ( int jj = j-1; jj != j+2; ++ jj ) {
+        for ( int jj = cast(int) j-1; jj != j+2; ++ jj ) {
           if ( jj == -1 || jj == tmap[ii].length ) continue; // lim
-          int ti = ii - i+1,
-              tj = jj - j+1;
+          int ti = ii - cast(int) i+1,
+              tj = jj - cast(int) j+1;
           if ( tmap[ii][jj] == -1 )
             surroundings[ti][tj] = 1;
           if ( tmap[ii][jj] <= -100 )
@@ -522,8 +522,8 @@ void Generate_Map() {
   /*   } */
   /* } */
 
-  map_width = tmap.length;
-  map_height = tmap[0].length;
+  map_width = cast(int) tmap.length;
+  map_height = cast(int) tmap[0].length;
   // -------------- generate graphix map ---------------------------------------
   import Entity.Map, Entity.Mob;
   map.length = tmap.length;
@@ -537,9 +537,9 @@ void Generate_Map() {
           /* AOD.Add(new Mob(i, j, m)); */
         } else if ( tmap[i][j] <= -100 ) {
           if ( tmap[i][j] > -200 )
-            AOD.Add(new Wall(i, j, tmap[i][j]));
+            AOD.Add(new Wall( cast(int) i, cast(int) j, tmap[i][j]));
           else
-            AOD.Add(new Floor(i, j, tmap[i][j]));
+            AOD.Add(new Floor( cast(int) i, cast(int) j, tmap[i][j]));
         }
       }
     }
@@ -561,7 +561,7 @@ void Generate_Map() {
         if ( AOD.R_Rand(0, 100) > 50 && charger < 10 ) ++ charger;
         if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 160 ) {
           charger = 0;
-          AOD.Add(new Entity.Map.Prop(i, j));
+          AOD.Add(new Entity.Map.Prop( cast(int) i, cast(int) j));
         }
       }
     }
