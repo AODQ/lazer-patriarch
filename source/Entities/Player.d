@@ -47,43 +47,26 @@ public:
     }
 
     -- walk_timer;
+    int dx = 0, dy = 0;
+    if (key_left) dx = -1;
+    if (key_right) dx = 1;
+    if (key_up) dy = -1;
+    if (key_down) dy = 1;
 
-    if ( walk_timer <= 0 && key_left ) {
+    if ( walk_timer <= 0 && (key_left || key_right || key_up || key_down)) {
       walk_timer = Walk_timer_start;
-      if ( Game_Manager.Valid_Position(tile_x-1, tile_y) ) {
-        Set_Tile_Pos(tile_x-1, tile_y);
-      }
-        // -- DEBUG START
-        import std.stdio : writeln;
-        import std.conv : to;
-        /* writeln(to!string(Game_Manager.map[tile_x-1][tile_y])); */
-        // -- DEBUG END
-    }
-    if ( walk_timer <= 0 && key_right ) {
-      walk_timer = Walk_timer_start;
-      if ( Game_Manager.Valid_Position(tile_x+1, tile_y) ) {
-        Set_Tile_Pos(tile_x+1, tile_y);
-      } else {
-        // -- DEBUG START
-        import std.stdio : writeln;
-        import std.conv : to;
-        /* writeln(to!string(Game_Manager.map[tile_x+1][tile_y])); */
-        // -- DEBUG END
-      }
-    }
-    if ( walk_timer <= 0 && key_up ) {
-      walk_timer = Walk_timer_start;
-      if ( Game_Manager.Valid_Position(tile_x, tile_y-1) ) {
-        Set_Tile_Pos(tile_x, tile_y-1);
-      }
-    }
-    if ( walk_timer <= 0 && key_down ) {
-      walk_timer = Walk_timer_start;
-      if ( Game_Manager.Valid_Position(tile_x, tile_y+1) ) {
-        Set_Tile_Pos(tile_x, tile_y+1);
+      if ( Game_Manager.Valid_Position(tile_x+dx, tile_y+dy) ) {
+        Set_Tile_Pos((tile_x+dx, tile_y+dy);
+        if ( map[tile_x+dx][tile_y+dy].length > 0 )
+        for (p : map[tile_x+dx][tile_y+dy]) {
+          if (p.R_Prop_Type() == Prop){
+            grabbed=p;
+          }
+        }
       }
     }
   }
+
   override void Post_Update() {
     Set_Position(tile_x*32 + 16, tile_y*32);
     static immutable(float) window_width  = 595,
