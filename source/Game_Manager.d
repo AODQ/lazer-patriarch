@@ -20,10 +20,10 @@ bool Valid_Position_Light(int x, int y) {
 }
 
 bool Valid_Position(int x, int y) {
-  if ( !Valid_Position(x, y) ) return false;
-  /* foreach ( i; 0 .. map[x][y].length ) { */
-  /*   if ( !map[x][y][i].R_Can_Be_Stepped_On()  ) return false; */
-  /* } */
+  if ( !Valid_Position_Light(x, y) ) return false;
+  foreach ( i; 0 .. map[x][y].length ) {
+    if ( !map[x][y][i].R_Can_Be_Stepped_On()  ) return false;
+  }
   return true;
 }
 
@@ -204,13 +204,13 @@ void Generate_Map() {
     } while ( x != y );
     Generate_Path(i, y, true);
   }
-  for(int i=0; i<twidth-1; i++) {
-    tmap[i][0] = -1;
-    tmap[i][theight-1] = -1;
+  for(int i=0; i<tmap.length; ++ i) {
+    tmap[i][0]   = -1;
+    tmap[i][$-1] = -1;
   }
-  for(int i=0; i < theight-1; i++) {
-    tmap[0][i] = -1;
-    tmap[twidth-1][i] = -1;
+  for(int i=0; i < tmap[0].length-1; ++i) {
+    tmap[0][i]   = -1;
+    tmap[$-1][i] = -1;
   }
   // -- DEBUG START
   import std.stdio;
@@ -606,7 +606,7 @@ void Generate_Map() {
     AOD.Add(new Prop(x, y-2, Prop.Type.Tree_Top));
   }
 
-  int amt_switches = cast(int)AOD.R_Rand(2, 5);
+  int amt_switches = cast(int)AOD.R_Rand(40, 50);
   for ( int i = 0; i != amt_switches; ++ i ) {
     int x, y;
     bool pass_once = false;

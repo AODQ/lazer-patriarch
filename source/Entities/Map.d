@@ -67,8 +67,8 @@ class Prop : Tile {
     Switch = 10,
     Moss = 11,
     Rock = 12,
-    Block_Bot = 13,
-    Block_Top = 14,
+    Block_Bot = 14,
+    Block_Top = 13,
     Tree_Top = 15,
     Tree_Mid = 16,
     Tree_Bot = 17,
@@ -87,7 +87,7 @@ public:
         prop == Type.Block_Bot )
       super(x, y, Tile_Type.Prop, Data.Layer.Item, false);
     else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
-              prop == Type.Block_Top )
+              prop == Type.Tree_Bot || prop == Type.Block_Top )
       super(x, y, Tile_Type.Prop, Data.Layer.Front_Prop);
     else
       super(x, y, Tile_Type.Prop, Data.Layer.Item);
