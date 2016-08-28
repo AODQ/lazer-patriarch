@@ -636,7 +636,9 @@ void Generate_Map() {
       y = cast(int)AOD.R_Rand(3, map[0].length);
     } while ( map[x][y].length == 0 ||
               map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
-    AOD.Add(new Prop(x, y
+    AOD.Add(new Prop(x, y, Entity.Map.Prop.Type.Closed_Door_Bot));
+    AOD.Add(new Prop(x, y-1, Entity.Map.Prop.Type.Closed_Door_Top));
+    writeln("Door x: " ~ to!string(x) ~ " y: " ~ to!string(y));
   }
 }
 

@@ -59,9 +59,8 @@ public:
 
     if ( !key_grab ) {
       grabbed_bot = null;
-      grabbed_bot = null;
-
     }
+
     bool blocked = false, grab_last_frame = false, grab_frame = false,
          blocked_by_block = false;
 
@@ -118,7 +117,27 @@ public:
                                      cast(int)grabbed_top.R_Tile_Pos.y+dy);
           }
         }
-
+      else if ( map[tile_x+dx][tile_y+dy].length > 0 ) {
+        import std.stdio;
+        writeln( (map[tile_x+dx][tile_y+dy].length));
+        foreach ( i ; 0 ..  map[tile_x+dx][tile_y+dy].length ) {
+          auto c = 
+                 cast(Entity.Map.Prop)(map[tile_x+dx][tile_y+dy][cast(int) i]);
+          if( c.R_Prop_Type() == Entity.Map.Prop.Type.Closed_Door_Bot ) {
+            AOD.Remove(c);
+            AOD.Util.Remove(map[tile_x+dx][tile_y+dy], cast(int) i);
+            AOD.Add(new Entity.Map.Prop(tile_x+dx, tile_y+dy,
+                    Entity.Map.Prop.Type.Open_Door_Vertic));
+          }
+          if( c.R_Prop_Type() == Entity.Map.Prop.Type.Closed_Door_Left ) {
+            AOD.Remove(c);
+            AOD.Util.Remove(map[tile_x+dx][tile_y+dy],  cast(int) i);
+        }
+          if( c.R_Prop_Type() == Entity.Map.Prop.Type.Closed_Door_Left ) {
+            AOD.Remove(c);
+            AOD.Util.Remove(map[tile_x+dx][tile_y+dy],  cast(int) i);
+        }
+      }
       } else if ( key_grab || !grab_frame ) {
         grab_last_frame = true;
         if ( map[tile_x+dx][tile_y+dy].length > 0 ) {
@@ -135,7 +154,7 @@ public:
             }
           }
         }
-      }
+      } 
     }
 
     if ( blocked_by_block ) {
@@ -207,7 +226,7 @@ public:
       Flip_X();
     grab_last_frame = blocked;
   }
-
+}
   override void Post_Update() {
     Set_Position(tile_x*32 + 16, tile_y*32);
     static immutable(float) window_width  = 595,

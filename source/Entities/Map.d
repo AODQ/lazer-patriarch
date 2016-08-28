@@ -67,21 +67,22 @@ class Prop : Tile {
     Closed_Door_Bot   = 9,
     Closed_Door_Left  = 10,
     Closed_Door_Right = 11,
-    Open_Door         = 12,
-    Switch            = 13,
-    Moss              = 14,
-    Rock              = 15,
-    Block_Bot         = 16,
-    Block_Top         = 17,
-    Tree_Top          = 18,
-    Tree_Mid          = 19,
-    Tree_Bot          = 20,
-    Vine_Top          = 21,
-    Vine_Bot          = 22,
-    Pillar_Top        = 23,
-    Pillar_Bot        = 24,
-    Arch_Left         = 25,
-    Arch_Right        = 26
+    Open_Door_Vertic  = 12,
+    Open_Door_Horiz   = 13,
+    Switch            = 14,
+    Moss              = 15,
+    Rock              = 16,
+    Block_Bot         = 17,
+    Block_Top         = 18,
+    Tree_Top          = 19,
+    Tree_Mid          = 20,
+    Tree_Bot          = 21,
+    Vine_Top          = 22,
+    Vine_Bot          = 23,
+    Pillar_Top        = 24,
+    Pillar_Bot        = 25,
+    Arch_Left         = 26,
+    Arch_Right        = 27
   };
   Type prop_type;
 public:
@@ -91,10 +92,10 @@ public:
     if ( prop == Type.Debris ) {
       prop_tex = cast(int)AOD.R_Rand(0, 7);
     }
-    if (prop == Type.Moss || prop == Type.Vine_Top || prop == Type.Vine_Bot) {
+    if (prop == Type.Moss || prop == Type.Vine_Top || prop == Type.Vine_Bot) 
       super(x, y, Tile_Type.Floor, Data.Layer.Foilage);
     
-    else if (prop == Type.Closed_Door || prop == Type.Rock ||
+    else if (prop == Type.Closed_Door_Bot || prop == Type.Rock ||
         prop == Type.Block_Bot || prop == Type.Tree_Bot )
       super(x, y, Tile_Type.Prop, Data.Layer.Block, false);
     else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
