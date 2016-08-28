@@ -86,36 +86,6 @@ void Generate_Map() {
     }
     return true;
   }
-  // returns false if not enough room
-  bool Create_Room(int room_id) {
-    int rx, ry, rw, rh;
-    int attempt = 0;
-    do {
-      rx = cast(int)AOD.R_Rand(0, twidth);
-      ry = cast(int)AOD.R_Rand(0, theight);
-      rw = cast(int)AOD.R_Rand(2, 5);
-      rh = cast(int)AOD.R_Rand(2, 5);
-      ++ attempt;
-    } while ( !Room_Intersects(rx, ry, rw, rh) && attempt < 20 );
-    if ( attempt >= 20 ) // not enough room
-      return false;
-    for ( int i = rx - rw; i != rx + rw; ++ i ) {
-      for ( int j = ry - rh; j != ry + rh; ++ j ) {
-        tmap[i][j] = -1;
-      }
-    }
-    trooms_x ~= rx; trooms_y ~= ry;
-    trooms_h ~= rh; trooms_w ~= rw;
-    return true;
-  }
-  // gen rooms
-  int rm_amt = cast(int)AOD.R_Rand(15, 30);
-  for ( int rms = 0; rms != rm_amt; ++ rms ) {
-    if ( !Create_Room(rms) ) {
-      break;
-    }
-  }
-
   bool Generate_Horiz(int sx, int sy, int ex, bool ni) {
     if ( ex < sx ) {
       sx ^= ex;
@@ -181,21 +151,47 @@ void Generate_Map() {
     } else {
       Generate_Verti(sry, srx, ery, ni);
       Generate_Horiz(srx, ery, erx, ni);
-      Generate_Verti(sry, srx+1, ery, ni);
-      Generate_Horiz(srx, ery+1, erx, ni);
+      Generate_Verti(sry+1, srx+1, ery-1, ni);
+      Generate_Horiz(srx+1, ery+1, erx-1, ni);
       if ( AOD.R_Rand(0, 50) > 40 ) {
-        Generate_Verti(sry, srx-1, ery, ni);
-        Generate_Horiz(srx, ery-1, erx, ni);
+        Generate_Verti(sry+1, srx-1, ery-1, ni);
+        Generate_Horiz(srx+1, ery-1, erx-1, ni);
       }
     }
   }
-
-  // gen paths
-  for ( int i = 0; i < trooms_x.length - 1; ++ i ) {
-    Generate_Path(i, i+1, false);
+  // returns false if not enough room
+  bool Create_Room(int room_id) {
+    int rx, ry, rw, rh;
+    int attempt = 0;
+    do {
+      rx = cast(int)AOD.R_Rand(0, twidth);
+      ry = cast(int)AOD.R_Rand(0, theight);
+      rw = cast(int)AOD.R_Rand(2, 5);
+      rh = cast(int)AOD.R_Rand(2, 5);
+      ++ attempt;
+    } while ( !Room_Intersects(rx, ry, rw, rh) && attempt < 20 );
+    if ( attempt >= 20 ) // not enough room
+      return false;
+    for ( int i = rx - rw; i != rx + rw; ++ i ) {
+      for ( int j = ry - rh; j != ry + rh; ++ j ) {
+        tmap[i][j] = -1;
+      }
+    }
+    trooms_x ~= rx; trooms_y ~= ry;
+    trooms_h ~= rh; trooms_w ~= rw;
+    return true;
   }
-  uint rand_paths = cast(int)AOD.R_Rand(trooms_x.length/40,
-                                        trooms_x.length/10);
+  // gen rooms
+  int rm_amt = cast(int)AOD.R_Rand(15, 30);
+  for ( int rms = 0; rms != rm_amt; ++ rms ) {
+    if ( !Create_Room(rms) ) {
+      break;
+    }
+    if ( rms != 0 )
+      Generate_Path(rms-1, rms, false);
+  }
+
+  uint rand_paths = cast(int)AOD.R_Rand(2, 3);
   for ( int i = 0; i != rand_paths; ++ i ) {
     int x, y;
     do {
@@ -255,6 +251,7 @@ void Generate_Map() {
   bool Valid_Wall_Token(int x, int y) {
     return tmap[x][y] != 0 && tmap[x][y] > -100;
   }
+  // --- first passthrough
   foreach ( i; 0 .. tmap.length ) {
     foreach ( j; 0 .. tmap[i].length ) {
       /* if ( tmap[i][j] != 0 ) continue; // empty */
@@ -339,15 +336,6 @@ void Generate_Map() {
       alias M = Data.Image.MapGrid;
       auto s = surroundings;
 
-      /* if ( */ 
-
-      // corner outside of wall
-      if ( s[1][2] == M.brick_l ) {
-        tmap[i][j] = M.wall_pll; continue;
-      }
-      if ( s[1][2] == M.wall_plr ) {
-        tmap[i][j] = M.brick; continue;
-      }
 
       bool Is_Brick(int x) {
         return x == M.brick || x == M.brick_r || x == M.brick_l;
@@ -364,30 +352,30 @@ void Generate_Map() {
         }
       }
 
-      if ( tmap[i][j] == 0 ) {
+      if ( tmap[i][j] == 0 && s[0][1] != -1 && s[1][0] != -1 &&
+                              s[1][2] != -1 && s[2][1] != -1 ) {
         // corner inside of wall
-        if ( s[2][2] == M.brick && s[0][1] != 1 && s[1][2] != M.brick ) {
+        if ( s[2][2] == M.brick && s[1][2] != M.brick ) {
           tmap[i][j] = M.wall_ctl; continue;
         }
-        if ( s[0][2] == M.brick && s[2][1] != 1 && s[1][2] != M.brick ) {
+        if ( s[0][2] == M.brick && s[1][2] != M.brick ) {
           tmap[i][j] = M.wall_ctr; continue;
         }
-        if ( s[2][0] == M.brick && s[0][1] != 1  && s[1][0] != M.brick ) {
+        if ( s[2][0] == M.brick ) {
           tmap[i][j] = M.wall_cll; continue;
         }
-        if ( s[0][0] == M.brick && s[2][1] != 1 && s[1][0] != M.brick ) {
+        if ( s[0][0] == M.brick ) {
           tmap[i][j] = M.wall_clr; continue;
         }
+      }
         // top of wall
-        if ( s[1][2] == M.brick ) {
+        if ( tmap[i][j] == 0 && s[1][2] == M.brick ) {
           tmap[i][j] = M.wall_b; continue;
         }
-      }
     }
   }
 
   // ------- third pass through { halls }
-
   foreach ( i; 0 .. tmap.length ) {
     foreach ( j; 0 .. tmap[i].length ) {
       /*  [0, 0] [1, 0] [2, 0]
@@ -412,6 +400,17 @@ void Generate_Map() {
       static import Data;
       alias M = Data.Image.MapGrid;
       auto s = surroundings;
+      // corner outside of wall
+      if ( s[1][2] == M.brick_l ) {
+        tmap[i][j] = M.wall_pll;
+        if ( s[1][0] == 1 )
+          tmap[i][j] = M.hall_capl;
+      }
+      if ( s[1][2] == M.brick_r ) {
+        tmap[i][j] = M.wall_plr;
+        if ( s[1][0] == 1 )
+          tmap[i][j] = M.hall_capr;
+      }
       if ( tmap[i][j] < -101 ) {
         if ( (s[1][0] == 1 && s[1][2] == 1) ) {
           tmap[i][j] = M.hall_horiz;
@@ -423,9 +422,9 @@ void Generate_Map() {
         if ( (s[0][1] == 1 && s[2][1] == 1) ){
           tmap[i][j] = M.hall_vert;
           if ( s[1][0] == 1 )
-            tmap[i][j] = M.hall_capd;
-          if ( s[1][2] == 1 )
             tmap[i][j] = M.hall_capu;
+          if ( s[1][2] == 1 )
+            tmap[i][j] = M.hall_capd;
         }
       }
     }
@@ -472,8 +471,8 @@ void Generate_Map() {
         // -- vertic/horiz
         if ( Is_Wall(s[0][1]) && Is_Wall(s[2][1]) )
           tmap[i][j] = M.floor_vert;
-        if ( Is_Wall(s[1][0]) && Is_Wall(s[1][2]) )
-          tmap[i][j] = M.floor_horiz;
+        /* if ( Is_Wall(s[1][0]) && Is_Wall(s[1][2]) ) */
+          /* tmap[i][j] = M.floor_horiz; */
         // -- corner
         if ( Is_Wall(s[0][0]) && Is_Wall(s[1][0]) && Is_Wall(s[0][1]) )
           tmap[i][j] = M.floor_tl;
@@ -497,6 +496,11 @@ void Generate_Map() {
           tmap[i][j] = M.floor_str;
         if ( Is_Wall(s[2][1]) && !Is_Wall(s[2][0]) )
           tmap[i][j] = M.floor_stl;
+
+        /* if ( Is_Wall(s[0][0]) && Is_Wall(s[2][1]) ) */
+        /*   tmap[i][j] = M.floor_splittl; */
+        /* if ( Is_Wall(s[2][0]) && Is_Wall(s[0][1]) ) */
+        /*   tmap[i][j] = M.floor_splittr; */
       }
     }
   }
@@ -547,7 +551,7 @@ void Generate_Map() {
   AOD.Add(player);
   static import Entity.UI;
   AOD.Add(new Entity.UI.HUD);
-  shadows.length = 300;
+  shadows.length = 600;
   foreach ( i; 0 .. shadows.length ) {
     shadows[i] = new Entity.Map.Black(0, 0);
     AOD.Add(shadows[i]);
@@ -571,10 +575,42 @@ void Generate_Map() {
 }
 
 void Update() {
-  /* int rlx = player.R_Tile_Pos().x - 10, rhx = player.R_Tile_Pos.x + 10; */
-  /* int rly = player.R_Tile_Pos().y - 7,  rhy = player.R_Tile_Pos.y + 7; */
-  /* for ( int i = rlx; i != rhx; ++ i) */
-  /* for ( int j = rly; i != rhy; ++ j ) { */
-
-  /* } */
+  import std.math;
+  auto px = player.R_Tile_Pos.x, py = player.R_Tile_Pos.y;
+  int rlx = cast(int)AOD.Util.R_Max(0, px - 10),
+      rhx = cast(int)AOD.Util.R_Min(Game_Manager.map.length, px + 10);
+  int rly = cast(int)AOD.Util.R_Max(0, py - 10),
+      rhy = cast(int)AOD.Util.R_Min(Game_Manager.map[0].length, py + 10);
+  int cnt = 0;
+  foreach ( b; shadows )
+    b.Set_Visible(false);
+  for ( int i = rlx; i != rhx; ++ i)
+  for ( int j = rly; j != rhy; ++ j ) {
+    auto l = AOD.Util.Bresenham_Line(cast(int)px, cast(int)py, i, j);
+    bool dark = false;
+    foreach ( l_i; 1 .. l.length-1 ) {
+      auto cx = cast(int)l[l_i].x, cy = cast(int)l[l_i].y;
+      if ( Game_Manager.map[cx][cy].length == 0 ) {
+        dark = true;
+        break;
+      }
+      if ( Game_Manager.map[cx][cy][$-1].Blocks_Vision() ) {
+        dark = true;
+        break;
+      }
+    }
+    if ( dark ) {
+      /* // -- DEBUG START */
+      /* import std.stdio : writeln; */
+      /* import std.conv : to; */
+      /* writeln("HIDING: " ~ to!string(i) ~ " " ~ to!string(j)); */
+      /* // -- DEBUG END */
+      shadows[cnt].Set_Tile_Pos(i, j);
+      shadows[cnt].Set_Visible(true);
+      shadows[cnt].Set_Colour(0, 0, 0,
+                              AOD.Vector(i, j).Distance(AOD.Vector(px, py))/5);
+    } else
+      shadows[cnt].Set_Visible(false);
+    if ( ++ cnt >= 599 ) return;
+  }
 }

@@ -31,10 +31,11 @@ public:
     Set_Position(tile_x*32 + 16, tile_y*32 + 16);
   }
   void Set_Tile_Pos(int x, int y) {
+    import Game_Manager : map;
+    if ( x < 0 || y < 0 || x >= map.length || y >= map[0].length ) return;
     int ox = tile_x, oy = tile_y;
     tile_x = x;
     tile_y = y;
-    import Game_Manager : map;
     foreach ( i; 0 .. map[ox][oy].length )
       if ( map[ox][oy][i] is this ) {
         map[ox][oy] = AOD.Util.Remove(map[ox][oy], cast(int) i);
@@ -88,6 +89,21 @@ public:
     /* writeln("WALL: " ~ to!string(img)); */
     /* // -- DEBUG END */
     Set_Sprite(Data.Image.walls[img]);
+    if ( id == Data.Image.MapGrid.hall_capu ) {
+      Flip_Y();
+    }
+    if ( id == Data.Image.MapGrid.hall_capr ) {
+      // -- DEBUG START
+      import std.stdio : writeln;
+      import std.conv : to;
+      writeln("FLIP: " ~ R_Flipped_Y());
+      // -- DEBUG END
+      Flip_X();
+    }
+    if ( id == Data.Image.MapGrid.floor_splittr )
+      Flip_X();
+    if ( id == Data.Image.MapGrid.hall_horiz )
+      Set_Rotation(AOD.Util.To_Rad(90));
   }
   override bool Blocks_Vision() {
     return true;
@@ -99,5 +115,11 @@ public:
   this(int x, int y) {
     super(x, y, Tile_Type.Nil, Data.Layer.Black);
     Set_Sprite(Data.Image.black);
+    Set_Colour(0, 0, 0, 1);
+  }
+  override void Added_To_Realm() {}
+  override void Set_Tile_Pos(int tx, int ty) {
+    position.x = tx*32+16;
+    position.y = ty*32+16;
   }
 }

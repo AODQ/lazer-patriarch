@@ -76,12 +76,11 @@ public: static:
 
     floor_stl = -209, floor_str = -210, floor_sll = -211, floor_slr = -212,
 
-    floor_vert = -213, floor_horiz = -214
+    floor_vert = -213, floor_horiz = -214,
+
+    floor_splittl = -215, floor_splittr = -216
   };
-  AOD.SheetRect[] walls,
-                  floors,
-                  mobs,
-                  props;
+  AOD.SheetRect[] walls, floors, mobs, props;
   AOD.SheetRect black;
   AOD.SheetRect player;
   AOD.SheetContainer HUD, projectile;
@@ -95,7 +94,7 @@ public: static:
       Gen_SR(1, 2), Gen_SR(0, 1), Gen_SR(2, 1), Gen_SR(1, 0), // walls
       Gen_SR(0, 0), Gen_SR(2, 0), Gen_SR(0, 2), Gen_SR(2, 2), // pokers
       Gen_SR(7, 1), Gen_SR(6, 1), Gen_SR(8, 1), // bricks
-      Gen_SR(0, 4), Gen_SR(2, 5), Gen_SR(3, 5), Gen_SR(4, 1),  // hall
+      Gen_SR(0, 4), Gen_SR(0, 4), Gen_SR(3, 5), Gen_SR(3, 5),  // hall
       Gen_SR(0, 5), Gen_SR(0, 5)                               // hall
     ];
     sheet = AOD.SheetContainer("assets/tset_props.png");
@@ -108,7 +107,7 @@ public: static:
       Gen_SR(1, 1), Gen_SR(0, 1), Gen_SR(2, 1), Gen_SR(1, 0), Gen_SR(1, 2),//fl
       Gen_SR(0, 0), Gen_SR(2, 0), Gen_SR(0, 2), Gen_SR(2, 2), // corner
       Gen_SR(3, 0), Gen_SR(4, 0), Gen_SR(3, 1), Gen_SR(4, 1), // shadow
-      Gen_SR(0, 4), Gen_SR(5, 3)
+      Gen_SR(0, 4), Gen_SR(5, 3), Gen_SR(2, 3), Gen_SR(2, 3)
     ];
     sheet = AOD.SheetContainer("assets/tset_player.png");
     player = AOD.SheetRect(sheet, 0, 0, 32, 32);
