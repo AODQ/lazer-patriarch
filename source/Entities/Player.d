@@ -7,8 +7,8 @@ class Player : Entity.Map.Tile {
   bool key_left, key_right, key_up, key_down, key_grab;
   float walk_timer = 0, shoot_timer = 0;
   immutable(float) Walk_timer_start = 10;
-  Entity.Prop.Block grabbed;
-  AOD.Animation shoot_anim; 
+  Entity.Map.Prop grabbed;
+  AOD.Animation shoot_anim;
 public:
   this(int x, int y) {
     static import Data;
@@ -56,7 +56,7 @@ public:
         // -- DEBUG START
         import std.stdio : writeln;
         import std.conv : to;
-        writeln(to!string(Game_Manager.map[tile_x-1][tile_y]));
+        /* writeln(to!string(Game_Manager.map[tile_x-1][tile_y])); */
         // -- DEBUG END
     }
     if ( walk_timer <= 0 && key_right ) {
@@ -67,7 +67,7 @@ public:
         // -- DEBUG START
         import std.stdio : writeln;
         import std.conv : to;
-        writeln(to!string(Game_Manager.map[tile_x+1][tile_y]));
+        /* writeln(to!string(Game_Manager.map[tile_x+1][tile_y])); */
         // -- DEBUG END
       }
     }

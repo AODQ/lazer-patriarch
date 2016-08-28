@@ -3,12 +3,13 @@ static import AOD;
 
 enum Layer {
   UI = 30,
-  Player = 31,
-  Black  = 32,
-  Mob    = 33,
-  Projectile = 34,
-  Item   = 35,
-  Floor  = 36
+  Front_Prop = 32,
+  Player = 33,
+  Black  = 34,
+  Mob    = 35,
+  Projectile = 36,
+  Item   = 37,
+  Floor  = 38
 }
 class Menu {
 public: static:
@@ -100,7 +101,10 @@ public: static:
     sheet = AOD.SheetContainer("assets/tset_props.png");
     props = [
       Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),
-      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1)
+      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),
+      Gen_SR(4, 0), Gen_SR(5, 0), Gen_SR(4, 1), Gen_SR(1, 4),
+      Gen_SR(1, 5), Gen_SR(3, 2), Gen_SR(3, 3), Gen_SR(0, 2),
+      Gen_SR(0, 3), Gen_SR(0, 4), Gen_SR(2, 2), Gen_SR(2, 3)
     ];
     sheet = AOD.SheetContainer("assets/tset_floor.png");
     floors = [

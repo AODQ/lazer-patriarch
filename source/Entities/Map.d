@@ -4,7 +4,7 @@ static import AOD;
 static import Data;
 
 enum Tile_Type {
-  Nil, Floor, Wall, Player, Mob
+  Nil, Floor, Wall, Player, Mob, Prop
 }
 
 class Tile : AOD.PolyEntity {
@@ -17,7 +17,7 @@ public:
     super(cast(ubyte)_layer);
     can_be_stepped_on = _cbso;
     tile_type         = _tile_type;
-    tile_x = x ;
+    tile_x = x;
     tile_y = y;
     Set_Position(tile_x*32 + 16, tile_y*32 + 16);
     Set_Image_Size(AOD.Vector(32, 32));
@@ -60,11 +60,40 @@ public:
   }
 }
 class Prop : Tile {
+  enum Type {
+    Debris = 0,
+    Opened_Door = 8,
+    Closed_Door = 9,
+    Switch = 10,
+    Moss = 11,
+    Rock = 12,
+    Block_Bot = 13,
+    Block_Top = 14,
+    Tree_Top = 15,
+    Tree_Mid = 16,
+    Tree_Bot = 17,
+    Vine_Top = 18,
+    Vine_Bot = 19
+  };
+  Type prop_type;
 public:
-  this(int x, int y) {
-    super(x, y, Tile_Type.Floor, Data.Layer.Item);
-    Set_Sprite(Data.Image.props[cast(int)AOD.R_Rand(0, $)]);
+  this(int x, int y, Type prop) {
+    prop_type = prop;
+    int prop_tex = prop;
+    if ( prop == Type.Debris ) {
+      prop_tex = cast(int)AOD.R_Rand(0, 7);
+    }
+    if (prop == Type.Closed_Door || prop == Type.Rock ||
+        prop == Type.Block_Bot )
+      super(x, y, Tile_Type.Prop, Data.Layer.Item, false);
+    else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
+              prop == Type.Block_Top )
+      super(x, y, Tile_Type.Prop, Data.Layer.Front_Prop);
+    else
+      super(x, y, Tile_Type.Prop, Data.Layer.Item);
+    Set_Sprite(Data.Image.props[prop_tex]);
   }
+  Type R_Prop_Type() { return prop_type; }
 }
 
 class Floor : Tile {

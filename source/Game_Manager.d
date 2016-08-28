@@ -20,7 +20,11 @@ bool Valid_Position_Light(int x, int y) {
 }
 
 bool Valid_Position(int x, int y) {
-  return Valid_Position_Light(x, y) && map[x][y][$-1].R_Can_Be_Stepped_On();
+  if ( !Valid_Position(x, y) ) return false;
+  /* foreach ( i; 0 .. map[x][y].length ) { */
+  /*   if ( !map[x][y][i].R_Can_Be_Stepped_On()  ) return false; */
+  /* } */
+  return true;
 }
 
 
@@ -564,21 +568,63 @@ void Generate_Map() {
     shadows[i] = new Entity.Map.Black(0, 0);
     AOD.Add(shadows[i]);
   }
-  // props
+  // -----  props
+  import Entity.Map : Prop;
   int charger = cast(int)AOD.R_Rand(0, 10);
-  foreach ( i; 0 .. map.length ) { // Fifth pass through ( props )
+  foreach ( i; 0 .. map.length ) { // Fifth pass through ( props -- moss )
     foreach ( j; 0 .. map[i].length ) {
       if ( map[i][j].length == 0 ) continue;
       if ( map[i][j][$-1].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) {
-        if ( AOD.R_Rand(0, 100) > 50 && charger < 10 ) ++ charger;
+        if ( AOD.R_Rand(0, 100) > 70 && charger < 10 ) ++ charger;
         if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 180 ) {
           charger = 0;
-          AOD.Add(new Entity.Map.Prop( cast(int) i, cast(int) j));
+          if ( AOD.R_Rand(0, 100) > 40 )
+            AOD.Add(new Prop(cast(int)i, cast(int)j, Prop.Type.Debris ));
+        }
+      } else if ( map[i][j][$-1].R_Tile_Type == Entity.Map.Tile_Type.Wall ) {
+        if ( AOD.R_Rand(0, 100) > 90 && charger < 10 ) ++ charger;
+        if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 195 ) {
+          charger = 0;
+          if ( AOD.R_Rand(0, 100) > 40 )
+            AOD.Add(new Entity.Map.Prop( cast(int)i, cast(int)j,
+                                               Prop.Type.Moss));
         }
       }
     }
   }
 
+  int amt_trees = cast(int)AOD.R_Rand(20, 25);
+  for ( int i = 0; i != amt_trees; ++ i ){
+    int x, y;
+    do {
+      x = cast(int)AOD.R_Rand(2, map.length);
+      y = cast(int)AOD.R_Rand(3, map[0].length);
+    } while ( map[x][y].length == 0 ||
+              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
+    AOD.Add(new Prop(x, y, Prop.Type.Tree_Bot));
+    AOD.Add(new Prop(x, y-1, Prop.Type.Tree_Mid));
+    AOD.Add(new Prop(x, y-2, Prop.Type.Tree_Top));
+  }
+
+  int amt_switches = cast(int)AOD.R_Rand(2, 5);
+  for ( int i = 0; i != amt_switches; ++ i ) {
+    int x, y;
+    bool pass_once = false;
+    DOAGAIN:
+    do {
+      x = cast(int)AOD.R_Rand(2, map.length);
+      y = cast(int)AOD.R_Rand(3, map[0].length);
+    } while ( map[x][y].length == 0 ||
+              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
+    if ( pass_once )
+      AOD.Add(new Prop(x, y, Prop.Type.Switch));
+    else {
+      AOD.Add(new Prop(x, y-1, Prop.Type.Block_Top));
+      AOD.Add(new Prop(x, y, Prop.Type.Block_Bot));
+      pass_once = true;
+      goto DOAGAIN;
+    }
+  }
 
 }
 
@@ -608,10 +654,10 @@ void Update() {
       }
     }
     if ( dark ) {
-      if ( Game_Manager.map[i][j].length > 0 )
-        Game_Manager.map[i][j][0].Set_Colour(0.5, 0.5, 0.5, 1.0);
-      foreach ( k; 1 .. Game_Manager.map[i][j].length )
-        Game_Manager.map[i][j][k].Set_Visible(false);
+      if ( map[i][j].length > 0 )
+        map[i][j][0].Set_Colour(0.5, 0.5, 0.5, 1.0);
+      foreach ( k; 1 .. map[i][j].length )
+        map[i][j][k].Set_Visible(false);
       /* // -- DEBUG START */
       /* import std.stdio : writeln; */
       /* import std.conv : to; */
@@ -622,10 +668,11 @@ void Update() {
       /* shadows[cnt].Set_Colour(0, 0, 0, */
       /*                         AOD.Vector(i, j).Distance(AOD.Vector(px, py))/5); */
     } else {
-      if ( Game_Manager.map[i][j].length > 0 )
-        Game_Manager.map[i][j][0].Set_Colour(1.0, 1.0, 1.0, 1.0);
-      foreach ( k; 1 .. Game_Manager.map[i][j].length )
-        Game_Manager.map[i][j][k].Set_Visible(true);
+      if ( map[i][j].length > 0 ) {
+        map[i][j][0].Set_Colour(1.0, 1.0, 1.0, 1.0);
+        foreach ( k;  1 .. map[i][j].length )
+          map[i][j][k].Set_Visible(true);
+      }
     }
     if ( ++ cnt >= 599 ) return;
   }
