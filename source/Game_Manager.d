@@ -600,17 +600,25 @@ void Update() {
       }
     }
     if ( dark ) {
+      if ( Game_Manager.map[i][j].length > 0 )
+        Game_Manager.map[i][j][0].Set_Colour(0.5, 0.5, 0.5, 1.0);
+      foreach ( k; 1 .. Game_Manager.map[i][j].length )
+        Game_Manager.map[i][j][k].Set_Visible(false);
       /* // -- DEBUG START */
       /* import std.stdio : writeln; */
       /* import std.conv : to; */
       /* writeln("HIDING: " ~ to!string(i) ~ " " ~ to!string(j)); */
       /* // -- DEBUG END */
-      shadows[cnt].Set_Tile_Pos(i, j);
-      shadows[cnt].Set_Visible(true);
-      shadows[cnt].Set_Colour(0, 0, 0,
-                              AOD.Vector(i, j).Distance(AOD.Vector(px, py))/5);
-    } else
-      shadows[cnt].Set_Visible(false);
+      /* shadows[cnt].Set_Tile_Pos(i, j); */
+      /* shadows[cnt].Set_Visible(true); */
+      /* shadows[cnt].Set_Colour(0, 0, 0, */
+      /*                         AOD.Vector(i, j).Distance(AOD.Vector(px, py))/5); */
+    } else {
+      if ( Game_Manager.map[i][j].length > 0 )
+        Game_Manager.map[i][j][0].Set_Colour(1.0, 1.0, 1.0, 1.0);
+      foreach ( k; 1 .. Game_Manager.map[i][j].length )
+        Game_Manager.map[i][j][k].Set_Visible(true);
+    }
     if ( ++ cnt >= 599 ) return;
   }
 }
