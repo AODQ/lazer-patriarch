@@ -2,15 +2,16 @@ module Data;
 static import AOD;
 
 enum Layer {
-  UI = 30,
+  UI = 20,
   Front_Wall = 31,
   Front_Prop = 32,
   Player = 33,
-  Black  = 34,
+  Block  = 34,
   Mob    = 35,
   Projectile = 36,
   Item   = 37,
-  Floor  = 38
+  Foilage   = 38,
+  Floor  = 39
 }
 class Menu {
 public: static:
@@ -57,9 +58,9 @@ auto Construct_New_Menu() {
 
 class Image {
 public: static:
-  class Hero {
+  class Player {
   public: static:
-    enum Direction {Down, Up, Side};
+    enum Dir { Down = 0, Up = 1, Side = 2 };
     AOD.Animation[3] walk, push, shoot;
     AOD.Animation explosion;
   }
@@ -97,14 +98,19 @@ public: static:
     auto sheet =AOD.SheetContainer("assets/grampion.png");
     auto Gen_SR(int x, int y) {
       return AOD.SheetRect(sheet, x*32, y*32, x*32 + 33, y*32 + 33);
-    foreach ( i; Hero.Direction.Down .. Hero.Direction.Side ) {
-      Hero.walk[i] = new AOD.Animation (AOD.Animation.Type.Linear,
-                   [Gen_SR(0,i),Gen_SR(1,i),Gen_SR(2,i)],1);
-      Hero.push[i] = new AOD.Animation (AOD.Animation.Type.Linear,
-                   [Gen_SR(0,i+3),Gen_SR(1,i+3),Gen_SR(2,i+3)],1);
+    }
+    auto Gen_PSR(int x, int y ) {
+      return AOD.SheetRect(sheet, x*32, y*32, x*32 + 33, y*32 + 33);
+    }
+    foreach ( i; 0 .. Player.Dir.max+1 ) {
+      Player.walk[i] = new AOD.Animation (AOD.Animation.Type.Linear,
+         [Gen_PSR(0,i  ),Gen_PSR(1,i  ),Gen_PSR(2,i  )],
+         cast(int)(150.0f/AOD.R_MS()));
+      Player.push[i] = new AOD.Animation (AOD.Animation.Type.Linear,
+         [Gen_PSR(0,i+3),Gen_PSR(1,i+3),Gen_PSR(2,i+3)],
+         cast(int)(150.0f/AOD.R_MS()));
     }
     sheet = AOD.SheetContainer("assets/tset_wall.png");
-    }
     walls = [
       Gen_SR(3, 0), Gen_SR(4, 0), Gen_SR(3, 1), Gen_SR(4, 1), // corners
       Gen_SR(1, 2), Gen_SR(0, 1), Gen_SR(2, 1), Gen_SR(1, 0), // walls
@@ -115,9 +121,10 @@ public: static:
     ];
     sheet = AOD.SheetContainer("assets/tset_props.png");
     props = [
-      Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),
-      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),
-      Gen_SR(4, 0), Gen_SR(5, 0), Gen_SR(4, 1), Gen_SR(1, 3),
+      Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),// debris
+      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),// debris
+      Gen_SR(5, 0), Gen_SR(4, 0), Gen_SR(4, 0), Gen_SR(4, 0),// door
+      Gen_SR(4, 1), Gen_SR(1, 3),
       Gen_SR(1, 4), Gen_SR(3, 2), Gen_SR(3, 3), Gen_SR(0, 2),
       Gen_SR(0, 3), Gen_SR(0, 4), Gen_SR(2, 2), Gen_SR(2, 3)
     ];

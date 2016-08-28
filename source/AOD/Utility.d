@@ -55,7 +55,7 @@ T Remove(T)(T array, int index) in {
   if ( array.length-1 == index ) return array[0 .. index];
   else {
     return array[0 .. index] ~
-           array[index .. $];
+           array[index+1 .. $];
   }
 }
 

@@ -4,7 +4,6 @@ import std.string;
 
 static import Entity.Map;
 Entity.Map.Tile[][][] map;
-Entity.Map.Tile[] shadows;
 Entity.Map.Tile player;
 int map_width, map_height;
 enum Turn {
@@ -22,7 +21,7 @@ bool Valid_Position_Light(int x, int y) {
 bool Valid_Position(int x, int y) {
   if ( !Valid_Position_Light(x, y) ) return false;
   foreach ( i; 0 .. map[x][y].length ) {
-    if ( !map[x][y][i].R_Can_Be_Stepped_On()  ) return false;
+    if ( !map[x][y][i].R_Collideable()  ) return false;
   }
   return true;
 }
@@ -37,7 +36,8 @@ void Add(T)(T x) {
   AOD.Add(x);
   if ( tile_x < 0 || tile_y < 0 ) {
     // not a tile map
-  }}
+  }
+}
 
 // only purpose is to add things after menu
 class Gmanage : AOD.Entity {
@@ -553,7 +553,8 @@ void Generate_Map() {
           /* AOD.Add(new Mob(i, j, m)); */
         } else if ( tmap[i][j] <= -100 ) {
           if ( tmap[i][j] > -200 ) {
-            if ( j != 0 && tmap[i][j-1] <= -200 ) {
+            if ( j != 0 && j != tmap.length && tmap[i][j-1] <= -200 &&
+                 tmap[i][j+1] > -200 ) {
               AOD.Add(new Wall( cast(int) i, cast(int) j, tmap[i][j], true));
             } else
               AOD.Add(new Wall( cast(int) i, cast(int) j, tmap[i][j], false));
@@ -566,11 +567,6 @@ void Generate_Map() {
   AOD.Add(player);
   static import Entity.UI;
   AOD.Add(new Entity.UI.HUD);
-  shadows.length = 600;
-  foreach ( i; 0 .. shadows.length ) {
-    shadows[i] = new Entity.Map.Black(0, 0);
-    AOD.Add(shadows[i]);
-  }
   // -----  props
   import Entity.Map : Prop;
   int charger = cast(int)AOD.R_Rand(0, 10);
@@ -584,20 +580,21 @@ void Generate_Map() {
           if ( AOD.R_Rand(0, 100) > 40 )
             AOD.Add(new Prop(cast(int)i, cast(int)j, Prop.Type.Debris ));
         }
-      } else if ( map[i][j][$-1].R_Tile_Type == Entity.Map.Tile_Type.Wall ) {
-        if ( AOD.R_Rand(0, 100) > 90 && charger < 10 ) ++ charger;
-        if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 195 ) {
-          charger = 0;
-          if ( i < map.length && j < map[i].length &&
-               map[i][j].length > 0 && map[i][j+1].length > 0)
-            if ( map[i][j][0].R_Tile_Type == Entity.Map.Tile_Type.Wall &&
-                 map[i][j+1][0].R_Tile_Type == Entity.Map.Tile_Type.Floor )
-              AOD.Add(new Entity.Map.Prop( cast(int)i, cast(int)j,
-                                                 Prop.Type.Moss));
-        }
       }
     }
   }
+
+  int amt_foilage = cast(int)AOD.R_Rand(40, 60);
+  for ( int i = 0; i != amt_foilage; ++ i ) {
+    int x, y;
+    do {
+      x = cast(int)AOD.R_Rand(2, map.length-2);
+      y = cast(int)AOD.R_Rand(3, map[0].length-2);
+    } while ( map[x][y].length == 0 || map[x][y+1].length == 0 ||
+              tmap[x][y] != Data.Image.MapGrid.brick );
+    AOD.Add(new Prop(x, y,   Prop.Type.Moss));
+  }
+
 
   int amt_trees = cast(int)AOD.R_Rand(20, 25);
   for ( int i = 0; i != amt_trees; ++ i ){
@@ -612,7 +609,7 @@ void Generate_Map() {
     AOD.Add(new Prop(x, y-2, Prop.Type.Tree_Top));
   }
 
-  int amt_switches = cast(int)AOD.R_Rand(40, 50);
+  int amt_switches = cast(int)AOD.R_Rand(2, 5);
   for ( int i = 0; i != amt_switches; ++ i ) {
     int x, y;
     bool pass_once = false;
@@ -632,6 +629,15 @@ void Generate_Map() {
     }
   }
 
+  { // --- door ---
+    int x, y;
+    do {
+      x = cast(int)AOD.R_Rand(2, map.length);
+      y = cast(int)AOD.R_Rand(3, map[0].length);
+    } while ( map[x][y].length == 0 ||
+              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
+    AOD.Add(new Prop(x, y
+  }
 }
 
 void Update() {
@@ -642,8 +648,7 @@ void Update() {
   int rly = cast(int)AOD.Util.R_Max(0, py - 10),
       rhy = cast(int)AOD.Util.R_Min(Game_Manager.map[0].length, py + 10);
   int cnt = 0;
-  foreach ( b; shadows )
-    b.Set_Visible(false);
+  Entity.Map.Prop[] props_to_vis;
   for ( int i = rlx; i != rhx; ++ i)
   for ( int j = rly; j != rhy; ++ j ) {
     auto l = AOD.Util.Bresenham_Line(cast(int)px, cast(int)py, i, j);
@@ -664,22 +669,32 @@ void Update() {
         map[i][j][0].Set_Colour(0.5, 0.5, 0.5, 1.0);
       foreach ( k; 1 .. map[i][j].length )
         map[i][j][k].Set_Visible(false);
-      /* // -- DEBUG START */
-      /* import std.stdio : writeln; */
-      /* import std.conv : to; */
-      /* writeln("HIDING: " ~ to!string(i) ~ " " ~ to!string(j)); */
-      /* // -- DEBUG END */
-      /* shadows[cnt].Set_Tile_Pos(i, j); */
-      /* shadows[cnt].Set_Visible(true); */
-      /* shadows[cnt].Set_Colour(0, 0, 0, */
-      /*                         AOD.Vector(i, j).Distance(AOD.Vector(px, py))/5); */
     } else {
+      alias M = Entity.Map;
       if ( map[i][j].length > 0 ) {
         map[i][j][0].Set_Colour(1.0, 1.0, 1.0, 1.0);
-        foreach ( k;  1 .. map[i][j].length )
+        foreach ( k;  1 .. map[i][j].length ) {
           map[i][j][k].Set_Visible(true);
+          if ( map[i][j][k].R_Tile_Type() == M.Tile_Type.Prop ) {
+            auto c = cast(M.Prop)(map[i][j][k]);
+            switch ( c.R_Prop_Type() ) {
+              default: break;
+              case M.Prop.Type.Block_Bot: case M.Prop.Type.Tree_Mid:
+                props_to_vis ~= c.R_Top();
+              break;
+              case M.Prop.Type.Tree_Bot:
+                auto d = c.R_Top();
+                props_to_vis ~= d;
+                props_to_vis ~= d.R_Top();
+              break;
+            }
+          }
+        }
       }
     }
-    if ( ++ cnt >= 599 ) return;
   }
+  foreach ( p; props_to_vis )
+    if ( p !is null )
+      p.Set_Visible(true);
+  player.Set_Visible(true);
 }

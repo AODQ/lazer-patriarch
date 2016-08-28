@@ -39,6 +39,7 @@ public:
     foreach ( i; 0 .. map[ox][oy].length )
       if ( map[ox][oy][i] is this ) {
         map[ox][oy] = AOD.Util.Remove(map[ox][oy], cast(int) i);
+        break;
       }
     /* if ( map[ox][oy].length != 0 ) */
     /*   map[ox][oy][$-1].Set_Visible(true); */
@@ -51,7 +52,7 @@ public:
   AOD.Vector R_Tile_Pos() {
     return AOD.Vector(tile_x, tile_y);
   }
-  bool R_Can_Be_Stepped_On() {
+  bool R_Collideable() {
     return can_be_stepped_on;
   }
   Tile_Type R_Tile_Type() { return tile_type; }
@@ -61,19 +62,26 @@ public:
 }
 class Prop : Tile {
   enum Type {
-    Debris = 0,
-    Opened_Door = 8,
-    Closed_Door = 9,
-    Switch = 10,
-    Moss = 11,
-    Rock = 12,
-    Block_Bot = 14,
-    Block_Top = 13,
-    Tree_Top = 15,
-    Tree_Mid = 16,
-    Tree_Bot = 17,
-    Vine_Top = 18,
-    Vine_Bot = 19
+    Debris            = 0,
+    Closed_Door_Top   = 8,
+    Closed_Door_Bot   = 9,
+    Closed_Door_Left  = 10,
+    Closed_Door_Right = 11,
+    Open_Door         = 12,
+    Switch            = 13,
+    Moss              = 14,
+    Rock              = 15,
+    Block_Bot         = 16,
+    Block_Top         = 17,
+    Tree_Top          = 18,
+    Tree_Mid          = 19,
+    Tree_Bot          = 20,
+    Vine_Top          = 21,
+    Vine_Bot          = 22,
+    Pillar_Top        = 23,
+    Pillar_Bot        = 24,
+    Arch_Left         = 25,
+    Arch_Right        = 26
   };
   Type prop_type;
 public:
@@ -83,9 +91,12 @@ public:
     if ( prop == Type.Debris ) {
       prop_tex = cast(int)AOD.R_Rand(0, 7);
     }
-    if (prop == Type.Closed_Door || prop == Type.Rock ||
+    if (prop == Type.Moss || prop == Type.Vine_Top || prop == Type.Vine_Bot) {
+      super(x, y, Tile_Type.Floor, Data.Layer.Foilage);
+    
+    else if (prop == Type.Closed_Door || prop == Type.Rock ||
         prop == Type.Block_Bot || prop == Type.Tree_Bot )
-      super(x, y, Tile_Type.Prop, Data.Layer.Item, false);
+      super(x, y, Tile_Type.Prop, Data.Layer.Block, false);
     else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
               prop == Type.Block_Top )
       super(x, y, Tile_Type.Prop, Data.Layer.Front_Prop);
@@ -94,6 +105,33 @@ public:
     Set_Sprite(Data.Image.props[prop_tex]);
   }
   Type R_Prop_Type() { return prop_type; }
+  // block bot -> block top
+  // bot -> mid -> top
+  Prop R_Top() {
+    import Game_Manager : map;
+    if ( prop_type == Type.Block_Bot ) {
+      foreach ( b; map[tile_x][tile_y-1] )
+        if ( b.R_Tile_Type == Tile_Type.Prop ) {
+          auto c = cast(Prop)(b);
+          if ( c.R_Prop_Type == Type.Block_Top ) return c;
+        }
+    }
+    if ( prop_type == Type.Tree_Bot ) {
+      foreach ( b; map[tile_x][tile_y-1] )
+        if ( b.R_Tile_Type == Tile_Type.Prop ) {
+          auto c = cast(Prop)(b);
+          if ( c.R_Prop_Type == Type.Tree_Mid ) return c;
+        }
+    }
+    if ( prop_type == Type.Tree_Mid ) {
+      foreach ( b; map[tile_x][tile_y-1] )
+        if ( b.R_Tile_Type == Tile_Type.Prop ) {
+          auto c = cast(Prop)(b);
+          if ( c.R_Prop_Type == Type.Tree_Top ) return c;
+        }
+    }
+    return null;
+  }
 }
 
 class Floor : Tile {
@@ -131,20 +169,6 @@ public:
       Set_Rotation(AOD.Util.To_Rad(90));
   }
   override bool Blocks_Vision() {
-    return true;
-  }
-}
-
-class Black : Tile {
-public:
-  this(int x, int y) {
-    super(x, y, Tile_Type.Nil, Data.Layer.Black);
-    Set_Sprite(Data.Image.black);
-    Set_Colour(0, 0, 0, 1);
-  }
-  override void Added_To_Realm() {}
-  override void Set_Tile_Pos(int tx, int ty) {
-    position.x = tx*32+16;
-    position.y = ty*32+16;
+    return !R_Collideable();
   }
 }
