@@ -607,6 +607,8 @@ void Update() {
       /* // -- DEBUG END */
       shadows[cnt].Set_Tile_Pos(i, j);
       shadows[cnt].Set_Visible(true);
+      shadows[cnt].Set_Colour(0, 0, 0,
+                              AOD.Vector(i, j).Distance(AOD.Vector(px, py))/5);
     } else
       shadows[cnt].Set_Visible(false);
     if ( ++ cnt >= 599 ) return;
