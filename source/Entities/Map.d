@@ -59,10 +59,30 @@ public:
   }
 }
 class Prop : Tile {
+enum Prop_Type{
+	Rocks = 0,
+	Opened_Door = 8,
+	Closed_Door = 9,
+	Switch = 10,
+	Moss = 11,
+	Block = 12,
+	Top_Tree = 13,
+	Middle_Tree = 14,
+	Bottom_Tree = 15
+}
 public:
-  this(int x, int y) {
-    super(x, y, Tile_Type.Floor, Data.Layer.Item);
-    Set_Sprite(Data.Image.props[cast(int)AOD.R_Rand(0, $)]);
+  this(int x, int y, Prop_Type prop) {
+	int prop_tex = prop;
+	if(prop == Prop_Type.Rocks){
+		prop_tex = cast(int)AOD.R_Rand(0, 7);
+	}
+	if(prop == Prop_Type.Closed_Door || prop == Prop_Type.Moss || prop == Prop_Type.Block || prop == Prop_Type.Bottom_Tree){
+		super(x, y, Tile_Type.Floor, Data.Layer.Item, false);
+	}
+	else{
+		super(x, y, Tile_Type.Floor, Data.Layer.Item);
+	}
+    Set_Sprite(Data.Image.props[prop_tex]);
   }
 }
 

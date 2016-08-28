@@ -559,12 +559,34 @@ void Generate_Map() {
       if ( map[i][j].length == 0 ) continue;
       if ( map[i][j][$-1].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) {
         if ( AOD.R_Rand(0, 100) > 50 && charger < 10 ) ++ charger;
-        if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 160 ) {
+		if ( AOD.R_Rand(0, 100)*(1 + charger/20) > 160 ) {
+			charger = 0;
+			AOD.Add(new Entity.Map.Prop(i, j, Entity.Map.Prop.Prop_Type.Switch));
+		}
+		else if ( AOD.R_Rand(0, 100)*(1 + charger/15) > 160 ) {
+			charger = 0;
+			AOD.Add(new Entity.Map.Prop(i, j, Entity.Map.Prop.Prop_Type.Block));
+        }
+		else if ( AOD.R_Rand(0, 100)*(1 + charger/12) > 160 ) {
+			charger = 0;
+			AOD.Add(new Entity.Map.Prop(i, j-2, Entity.Map.Prop.Prop_Type.Top_Tree));
+			AOD.Add(new Entity.Map.Prop(i, j-1, Entity.Map.Prop.Prop_Type.Middle_Tree));
+			AOD.Add(new Entity.Map.Prop(i, j, Entity.Map.Prop.Prop_Type.Bottom_Tree));
+        }
+        else if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 160 ) {
           charger = 0;
-          AOD.Add(new Entity.Map.Prop(i, j));
+			AOD.Add(new Entity.Map.Prop(i, j, Entity.Map.Prop.Prop_Type.Rocks));
         }
       }
-    }
+	  else if ( map[i][j][$-1].R_Tile_Type() == Entity.Map.Tile_Type.Wall ) {
+		  if ( AOD.R_Rand(0, 100) > 50 && charger < 10 ) ++ charger;
+		  if ( AOD.R_Rand(0, 100)*(1 + charger/8) > 160 ) {
+			  charger = 0;
+			  AOD.Add(new Entity.Map.Prop(i, j, Entity.Map.Prop.Prop_Type.Moss));
+		  }
+      }
+
+	}
   }
 
 

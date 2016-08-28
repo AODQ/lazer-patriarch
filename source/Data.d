@@ -100,8 +100,16 @@ public: static:
     ];
     sheet = AOD.SheetContainer("assets/tset_props.png");
     props = [
-      Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),
-      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1)
+      Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),//rocks
+      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),//rocks
+	  Gen_SR(4, 0), //opened door
+	  Gen_SR(5, 0), //closed door
+	  Gen_SR(4, 1), //switch
+	  AOD.SheetRect(sheet , 32  , 80 , 65  , 113), //moss
+	  AOD.SheetRect(sheet , 96  , 64 , 129  , 129), //block
+	  AOD.SheetRect(sheet , 0   , 64 , 33  , 97), //top tree 	
+	  AOD.SheetRect(sheet , 0   , 96 , 33  , 129), //mid tree
+	  AOD.SheetRect(sheet , 0   , 128 , 33  , 161) //top tree 
     ];
     sheet = AOD.SheetContainer("assets/tset_floor.png");
     floors = [
