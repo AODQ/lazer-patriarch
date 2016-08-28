@@ -57,6 +57,13 @@ auto Construct_New_Menu() {
 
 class Image {
 public: static:
+  class Hero {
+  public: static:
+    enum Direction {Down, Up, Side};
+    AOD.Animation[3] walk, push, shoot;
+    AOD.Animation explosion;
+  }
+
   enum MapGrid {
     // ---- wall
     wall_ctl = -100, wall_ctr = -101, wall_cll = -102, wall_clr = -103,
@@ -87,9 +94,16 @@ public: static:
   AOD.SheetRect player;
   AOD.SheetContainer HUD, projectile;
   void Initialize() {
-    auto sheet = AOD.SheetContainer("assets/tset_wall.png");
+    auto sheet =AOD.SheetContainer("assets/grampion.png");
     auto Gen_SR(int x, int y) {
       return AOD.SheetRect(sheet, x*32, y*32, x*32 + 33, y*32 + 33);
+    foreach ( i; Hero.Direction.Down .. Hero.Direction.Side ) {
+      Hero.walk[i] = new AOD.Animation (AOD.Animation.Type.Linear,
+                   [Gen_SR(0,i),Gen_SR(1,i),Gen_SR(2,i)],1);
+      Hero.push[i] = new AOD.Animation (AOD.Animation.Type.Linear,
+                   [Gen_SR(0,i+3),Gen_SR(1,i+3),Gen_SR(2,i+3)],1);
+    }
+    sheet = AOD.SheetContainer("assets/tset_wall.png");
     }
     walls = [
       Gen_SR(3, 0), Gen_SR(4, 0), Gen_SR(3, 1), Gen_SR(4, 1), // corners
