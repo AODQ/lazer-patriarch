@@ -200,7 +200,14 @@ void Generate_Map() {
     } while ( x != y );
     Generate_Path(i, y, true);
   }
-
+  for(int i=0; i<twidth-1; i++) {
+    tmap[i][0] = -1;
+    tmap[i][theight-1] = -1;
+  }
+  for(int i=0; i < theight-1; i++) {
+    tmap[0][i] = -1;
+    tmap[twidth-1][i] = -1;
+  }
   // -- DEBUG START
   import std.stdio;
   import std.conv : to;
