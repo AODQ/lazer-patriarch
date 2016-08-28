@@ -563,7 +563,7 @@ void Generate_Map() {
       if ( map[i][j].length == 0 ) continue;
       if ( map[i][j][$-1].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) {
         if ( AOD.R_Rand(0, 100) > 50 && charger < 10 ) ++ charger;
-        if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 160 ) {
+        if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 180 ) {
           charger = 0;
           AOD.Add(new Entity.Map.Prop( cast(int) i, cast(int) j));
         }
