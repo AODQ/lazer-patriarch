@@ -23,7 +23,7 @@ void Init () {
                                      AOD.R_Window_Height()/2));
   AOD.Text.Set_Default_Font("assets/DejaVuSansMono.ttf", 20);
   AOD.Console.Initialize(AOD.Console.Type.Debug_In);
-  AOD.Set_BG_Colour(0.0, 0.0, 0.0);
+  AOD.Set_BG_Colour(1.0, 1.0, 1.0);
   // --- debug ---
 }
 
@@ -33,13 +33,13 @@ void Game_Init () {
 */
   AOD.Sound.Clean_Up();
   static import Data;
-  Data.Image.Initialize();
-  Data.Sound.Initialize();
+  Data.Initialize();
   import Entity.Splashscreen;
   /* AOD.Add(new Splash(Data.Construct_New_Menu)); */
+  AOD.Add((Data.Construct_New_Menu));
+  /* Game_Manager.Generate_Map(); */
+  AOD.Camera.Set_Position(0, 0);
   // -- map
-  static import Game_Manager;
-  Game_Manager.Generate_Map();
 }
 
 int main () {

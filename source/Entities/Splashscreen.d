@@ -112,7 +112,8 @@ public:
     /* } */
     Set_Sprite(img[1][1]);
     Set_Position(AOD.R_Window_Width/2, AOD.R_Window_Height/2);
-    Set_Colour(1, 1, 1, 1.0);
+    Set_Static_Pos(true);
+    /* Set_Colour(1, 1, 1, 1.0); */
     timer_start = (12500.0f/AOD.R_MS());
     timer = 8.5f;
     time = 0.0f;

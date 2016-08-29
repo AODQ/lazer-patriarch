@@ -2,6 +2,7 @@ module Data;
 static import AOD;
 
 enum Layer {
+  UIT = 19,
   UI = 20,
   Front_Wall = 31,
   Front_Prop = 32,
@@ -18,7 +19,8 @@ enum Layer {
 class Menu {
 public: static:
   AOD.SheetRect splashscreen;
-  AOD.SheetRect background, background_submenu;
+  AOD.SheetRect background, background_submenu_credits,
+                background_submenu_controls;
   AOD.SheetRect[] credits;
   AOD.SheetRect[AOD.Menu.Button.max+1] buttons;
   string[] text_credits;
@@ -32,7 +34,10 @@ public: static:
     alias SR = AOD.SheetRect;
     alias SC = AOD.SheetContainer;
     background = cast(SR)SC("assets/menu/background.png");
-    background_submenu = cast(SR)SC("assets/menu/background-submenu.png");
+    background_submenu_credits=
+      cast(SR)SC("assets/menu/background-submenu.png");
+    background_submenu_controls=
+      cast(SR)SC("assets/menu/background-submenu.png");
     buttons = [
       cast(SR)SC("assets/menu/button_start.png"),
       cast(SR)SC("assets/menu/button_controls.png"),
@@ -42,7 +47,7 @@ public: static:
     ];
     text_credits = [
                     "AODQ - Engine, Code",
-                    "Smilecythe   - Pixels, Music",
+                    "Smilecythe   - Pixels, Music"
                    ];
   }
 }
@@ -50,7 +55,8 @@ public: static:
 auto Construct_New_Menu() {
   static import Game_Manager;
   return new AOD.Menu(
-    Data.Menu.background, Data.Menu.background_submenu,
+    Data.Menu.background, Data.Menu.background_submenu_credits,
+    Data.Menu.background_submenu_controls,
     Data.Menu.buttons,    Data.Menu.text_credits,
     new Game_Manager.Gmanage, Data.Menu.button_y, Data.Menu.button_y_it,
     Data.Menu.credit_y, Data.Menu.credit_y_it, Data.Menu.credit_text_x,
@@ -167,6 +173,7 @@ public: static:
           Gen_PSR(7, 3), Gen_PSR(8, 3) ], cast(int)(100.0f/AOD.R_MS()));
     Player.proj_vert = Gen_PSR(3, 1); Player.proj_horiz = Gen_PSR(4, 1);
     Player.shadow    = Gen_PSR(3, 5);
+    Player.dead      = Gen_PSR(3, 4);
 
     sheet = AOD.SheetContainer("assets/enemy.png");
     foreach ( i; 0 .. Enemy.Dir.max+1 ) {
@@ -186,6 +193,7 @@ public: static:
           Gen_PSR(7, 3), Gen_PSR(8, 3) ], cast(int)(100.0f/AOD.R_MS()));
     Enemy.proj_vert = Gen_PSR(3, 1); Enemy.proj_horiz = Gen_PSR(4, 1);
     Enemy.shadow    = Gen_PSR(3, 5);
+    Enemy.dead      = Gen_PSR(3, 4);
 
     sheet = AOD.SheetContainer("assets/tset_wall.png");
     walls = [
@@ -201,8 +209,10 @@ public: static:
     sheet = AOD.SheetContainer("assets/tset_props.png");
     props = [
       Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),// debris
-      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),// debris
-      Gen_SR(5, 0), Gen_SR(4, 0), Gen_SR(4, 0), Gen_SR(4, 0),Gen_SR(4, 0),//dor
+      Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),// debris 7
+      Gen_SR(5, 0), Gen_SR(5, 0), Gen_SR(5, 0), Gen_SR(5, 0), // door close
+      Gen_SR(5, 1), Gen_SR(5, 1), Gen_SR(5, 1), Gen_SR(5, 1), // door close
+      Gen_SR(4, 0), Gen_SR(4, 0), // door open
       Gen_SR(4, 1), Gen_SR(1, 3),
       Gen_SR(1, 4),
 
@@ -212,7 +222,9 @@ public: static:
       Gen_SR(0, 2),
       Gen_SR(0, 3), Gen_SR(0, 4), Gen_SR(2, 2), Gen_SR(2, 3),
 
-      Gen_SR(5, 3), Gen_SR(5, 2)
+      Gen_SR(5, 3), Gen_SR(5, 2),
+
+      Gen_SR(2, 4)
     ];
     sheet = AOD.SheetContainer("assets/tset_floor.png");
     floors = [
@@ -230,11 +242,11 @@ public: static:
 
 class Sound {
 public: static:
-  uint block_move, spawn, door_open, gramp_dies, stage_complete, monster_dies,
+  uint spawn, door_open, gramp_dies, stage_complete, monster_dies,
        laser_hit, laser_fire, switch_activate, gramp_push, bg_music;
   uint[3] gramp_hurt, step;
+  uint[10] block_move;
   void Initialize() {
-    block_move      = AOD.Load_Sound("assets/sounds/block-move.ogg"      ) ;
     spawn           = AOD.Load_Sound("assets/sounds/spawn.ogg"           ) ;
     door_open       = AOD.Load_Sound("assets/sounds/door-open.ogg"       ) ;
     gramp_dies      = AOD.Load_Sound("assets/sounds/gramp-dies.ogg"      ) ;
@@ -246,14 +258,32 @@ public: static:
     gramp_push      = AOD.Load_Sound("assets/sounds/gramp-push.ogg"      ) ;
     bg_music = AOD.Load_Sound("assets/sounds/background-music.ogg");
     gramp_hurt = [
-      AOD.Load_Sound  ("assets/sounds/gramp_hurt1.ogg"),
-      AOD.Load_Sound  ("assets/sounds/gramp_hurt2.ogg"),
-      AOD.Load_Sound  ("assets/sounds/gramp_hurt3.ogg")
+      AOD.Load_Sound  ("assets/sounds/gramp-hurt1.ogg"),
+      AOD.Load_Sound  ("assets/sounds/gramp-hurt2.ogg"),
+      AOD.Load_Sound  ("assets/sounds/gramp-hurt3.ogg")
     ];
     step = [
       AOD.Load_Sound  ("assets/sounds/step1.ogg"),
       AOD.Load_Sound  ("assets/sounds/step2.ogg"),
       AOD.Load_Sound  ("assets/sounds/step2.ogg")
     ];
+    block_move = [
+      AOD.Load_Sound  ("assets/sounds/block1.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block2.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block3.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block4.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block5.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block6.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block7.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block8.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block9.ogg"),
+      AOD.Load_Sound  ("assets/sounds/block10.ogg"),
+    ];
   }
+}
+
+void Initialize() {
+  Sound.Initialize();
+  Image.Initialize();
+  Menu.Initialize();
 }

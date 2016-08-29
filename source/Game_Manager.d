@@ -3,12 +3,14 @@ static import AOD;
 import std.string;
 static import Data;
 static import Entity.Player;
+import Entity.Map;
 
 static import Entity.Map;
 Entity.Map.Tile[][][] map;
 Entity.Player.Player player;
 AOD.Entity[] projectiles;
 AOD.Entity[] explosions;
+Prop[] stone_doors;
 int map_width, map_height;
 enum Turn {
   Player, AI
@@ -30,10 +32,22 @@ bool Valid_Position(int x, int y) {
   return true;
 }
 
+void Initialize() {
+  restarted = false;
+  player = null;
+  map.length = 0;
+  projectiles = [];
+  explosions = [];
+  stone_doors = [];
+  AOD.Camera.Set_Position(0, 0);
+  AOD.Add(Data.Construct_New_Menu());
+}
+
 void Add(T)(T x) {
   import Entity.Projectile;
   static if ( is(T == Projectile   )) { projectiles ~= x; }
   static if ( is(T == Explosion    )) { explosions ~= x; }
+  static if ( is(T == Prop         )) { stone_doors ~= x; }
   /* static if ( is(T == Paddle  )) { paddle     = x; } */
   AOD.Add(x);
 }
@@ -42,6 +56,8 @@ void Add(T)(T x) {
 class Gmanage : AOD.Entity {
 public:
   override void Added_To_Realm() {
+    Generate_Map();
+    AOD.Remove(this);
   }
 }
 
@@ -57,35 +73,54 @@ void Remove(T)(T x) {
   import Entity.Projectile;
   static if ( is(T == Projectile) ) {
     mixin(Rem!("projectiles" ));
+
   }
   static if ( is(T == Explosion) ) {
     mixin(Rem!("explosions" ));
   }
+  static if ( is(T == Prop) ) {
+    mixin(Rem!("stone_doors" ));
+  }
   AOD.Remove(x);
 }
 
+bool restarted = false;
+
 void Restart_Game() {
-  AOD.Clean_Up(Data.Construct_New_Menu);
+  // -- DEBUG START
+  import std.stdio : writeln;
+  import std.conv : to;
+  writeln("CLEANING UP");
+  // -- DEBUG END
+  AOD.Clean_Up();
+  restarted = true;
+  /* AOD.Clean_Up(Data.Construct_New_Menu); */
 }
 
 void Generate_Map() {
   // -------------- generate textual map ---------------------------------------
   int[][] tmap;
+  int[][] lmap;
   int[] trooms_x, trooms_y, trooms_w, trooms_h;
-  int twidth = 50; // cast(int)AOD.R_Rand(50, 100);
-  int theight = 50; // cast(int)AOD.R_Rand(50, 100);
-  tmap.length = twidth;
-  for ( int i = 0; i != tmap.length; ++ i )
+  int twidth = 100; // cast(int)AOD.R_Rand(50, 100);
+  int theight = 100; // cast(int)AOD.R_Rand(50, 100);
+  tmap.length = lmap.length = twidth;
+  for ( int i = 0; i != tmap.length; ++ i ) {
     tmap[i].length = theight;
+    lmap[i].length = theight;
+  }
+  foreach ( i; 0 .. lmap.length )
+    foreach ( j; 0 .. lmap[i].length )
+      lmap[i][j] = -1;
   // return true if room valid loc
   bool Room_Intersects(int rx, int ry, int rw, int rh) {
     int lx = rx - rw, ly = ry - rh,
         hx = rx + rw, hy = ry + rh;
     // map boundaries
-    if ( lx < 0 ) return false;
-    if ( ly < 0 ) return false;
-    if ( hx >= twidth ) return false;
-    if ( hy >= theight ) return false;
+    if ( lx < 2 ) return false;
+    if ( ly < 2 ) return false;
+    if ( hx >= twidth-2 ) return false;
+    if ( hy >= theight-2 ) return false;
     // r boundaries
     for ( int i = rx - rw; i != rx + rw; ++ i ) {
       for ( int j = ry - rh; j != ry + rh; ++ j ) {
@@ -133,8 +168,9 @@ void Generate_Map() {
     }
     return true;
   }
-  void Generate_Path(int i, int y, bool ni) {
-    if ( i == y ) return;
+  bool Generate_Path(int i, int y, bool ni, ref int px, ref int py,
+                     int width = -1) {
+    if ( i == y ) return 0;
     int srx = trooms_x [ i ] ,
         sry = trooms_y [ i ] ,
         srw = trooms_w [ i ] ,
@@ -147,42 +183,56 @@ void Generate_Map() {
         oy = cast(int)AOD.R_Rand(sry - srh, sry + srh),
         fx = cast(int)AOD.R_Rand(erx - erw, erx + erw),
         fy = cast(int)AOD.R_Rand(ery - ery, ery + erh);
+    width = width == -1 ? (AOD.R_Rand(0, 50) > 40 ? 1 : 0) : 0;
     if ( AOD.R_Rand(0, 2) > 1.0f ) { // horiz?
+      px = (erx<srx ? srx + 2 : srx - 2);
+      py = sry;
       Generate_Horiz(srx, sry, erx, ni);
       Generate_Verti(sry, erx, ery, ni);
       Generate_Horiz(srx, sry+1, erx, ni);
       Generate_Verti(sry, erx+1, ery, ni);
-      if ( AOD.R_Rand(0, 50) > 40 ) {
+      if ( width ) {
         Generate_Horiz(srx, sry-1, erx, ni);
         Generate_Verti(sry, erx-1, ery, ni);
       }
+      return 0;
     } else {
+      px = srx;
+      py = (ery<sry ? sry + 2 : sry - 2);
       Generate_Verti(sry, srx, ery, ni);
       Generate_Horiz(srx, ery, erx, ni);
       Generate_Verti(sry+1, srx+1, ery-1, ni);
       Generate_Horiz(srx+1, ery+1, erx-1, ni);
-      if ( AOD.R_Rand(0, 50) > 40 ) {
+      if ( width ) {
         Generate_Verti(sry+1, srx-1, ery-1, ni);
         Generate_Horiz(srx+1, ery-1, erx-1, ni);
       }
+      return 1;
     }
   }
   // returns false if not enough room
   bool Create_Room(int room_id) {
     int rx, ry, rw, rh;
     int attempt = 0;
+    import std.math;
     do {
       rx = cast(int)AOD.R_Rand(0, twidth);
       ry = cast(int)AOD.R_Rand(0, theight);
       rw = cast(int)AOD.R_Rand(2, 5);
       rh = cast(int)AOD.R_Rand(2, 5);
+      if ( room_id == 0 ) {
+        rx = ry = 50;
+        rw = 6; rh = 6;
+      }
       ++ attempt;
-    } while ( !Room_Intersects(rx, ry, rw, rh) && attempt < 20 );
+    } while ( !Room_Intersects(rx, ry, rw, rh) && attempt < 20
+              && (sqrt(pow(rx, 2.0f) - 50.0f) + pow(ry, 2.0f)-50) < 15*room_id);
     if ( attempt >= 20 ) // not enough room
       return false;
     for ( int i = rx - rw; i != rx + rw; ++ i ) {
       for ( int j = ry - rh; j != ry + rh; ++ j ) {
         tmap[i][j] = -1;
+        lmap[i][j] = room_id;
       }
     }
     trooms_x ~= rx; trooms_y ~= ry;
@@ -190,24 +240,65 @@ void Generate_Map() {
     return true;
   }
   // gen rooms
-  int rm_amt = cast(int)AOD.R_Rand(15, 30);
-  for ( int rms = 0; rms != rm_amt; ++ rms ) {
-    if ( !Create_Room(rms) ) {
-      break;
+  // -- create first room --
+  while ( !Create_Room(0) ) {}
+  while ( !Create_Room(1) ) {}
+  int path_x, path_y;
+  bool path_horiz = Generate_Path(1, 0, false, path_x, path_y, 0);
+  int player_sp_x, player_sp_y;
+  {// -- add blocks and switch thing --
+    lmap[cast(int)(56 - AOD.R_Rand(1, 11))][cast(int)(56 - AOD.R_Rand(1, 11))]
+          = 100;
+    int x = 0, y = 0;
+    do {
+      x = cast(int)(56 - AOD.R_Rand(1, 11));
+      y = cast(int)(56 - AOD.R_Rand(1, 11));
+    } while ( lmap[x][y] == 100 );
+    lmap[x][y] = 100;
+    do {
+      x = cast(int)(56 - AOD.R_Rand(1, 11));
+      y = cast(int)(56 - AOD.R_Rand(1, 11));
+    } while ( lmap[x][y] == 100 );
+    lmap[x][y] = 101;
+    do {
+      x = cast(int)(56 - AOD.R_Rand(1, 11));
+      y = cast(int)(56 - AOD.R_Rand(1, 11));
+    } while ( lmap[x][y] == 100 || lmap[x][y] == 101 );
+    lmap[x][y] = 102;
+    do {
+      x = cast(int)(56 - AOD.R_Rand(1, 11));
+      y = cast(int)(56 - AOD.R_Rand(1, 11));
+    } while ( lmap[x][y] >= 100 );
+    player_sp_x = x;
+    player_sp_y = y;
+    if ( path_horiz ) {
+      lmap[path_x][path_y]   = 103;
+      lmap[path_x+1][path_y] = 104;
+    } else {
+      lmap[path_x][path_y]   = 105;
+      lmap[path_x][path_y+1] = 106;
     }
-    if ( rms != 0 )
-      Generate_Path(rms-1, rms, false);
   }
 
-  uint rand_paths = cast(int)AOD.R_Rand(2, 3);
-  for ( int i = 0; i != rand_paths; ++ i ) {
-    int x, y;
-    do {
-      x = cast(int)AOD.R_Rand(1, trooms_x.length);
-      y = cast(int)AOD.R_Rand(1, trooms_x.length);
-    } while ( x != y );
-    Generate_Path(i, y, true);
-  }
+
+  /* int rm_amt = cast(int)AOD.R_Rand(15, 30); */
+  /* for ( int rms = 0; rms != rm_amt; ++ rms ) { */
+  /*   if ( !Create_Room(rms) ) { */
+  /*     break; */
+  /*   } */
+  /*   if ( rms != 0 ) */
+  /*     Generate_Path(rms-1, rms, false); */
+  /* } */
+
+  /* uint rand_paths = cast(int)AOD.R_Rand(2, 3); */
+  /* for ( int i = 0; i != rand_paths; ++ i ) { */
+  /*   int x, y; */
+  /*   do { */
+  /*     x = cast(int)AOD.R_Rand(1, trooms_x.length); */
+  /*     y = cast(int)AOD.R_Rand(1, trooms_x.length); */
+  /*   } while ( x != y ); */
+  /*   Generate_Path(i, y, true); */
+  /* } */
   for(int i=0; i<tmap.length; ++ i) {
     tmap[i][0]   = -1;
     tmap[i][$-1] = -1;
@@ -252,11 +343,7 @@ void Generate_Map() {
 
   // place player
   import Entity.Player;
-  {
-    int rx = trooms_x [ 1 ] ,
-        ry = trooms_y [ 1 ] ;
-    player = new Player(rx, ry);
-  }
+  player = new Player(player_sp_x, player_sp_y);
 
   // ensure tmap has boundaries
   tmap = [][]  ~ tmap ~ [][];
@@ -619,8 +706,8 @@ void Generate_Map() {
   int charger = cast(int)AOD.R_Rand(0, 10);
   foreach ( i; 0 .. map.length ) { // sixth pass through ( props -- moss )
     foreach ( j; 0 .. map[i].length ) {
-      if ( map[i][j].length == 0 ) continue;
-      if ( map[i][j][$-1].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) {
+      if ( map[i][j].length != 1 ) continue;
+      if ( map[i][j][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) {
         if ( AOD.R_Rand(0, 100) > 70 && charger < 10 ) ++ charger;
         if ( AOD.R_Rand(0, 100)*(1 + charger/10) > 180 ) {
           charger = 0;
@@ -637,7 +724,8 @@ void Generate_Map() {
     do {
       x = cast(int)AOD.R_Rand(2, map.length-2);
       y = cast(int)AOD.R_Rand(3, map[0].length-2);
-    } while ( tmap[x][y] != Data.Image.MapGrid.brick );
+      if ( tmap[x][y] == Data.Image.MapGrid.brick ) break;
+    } while ( true );
       switch ( cast(int)(AOD.R_Rand(0, 3)) ) {
         default: break;
         case 0:
@@ -654,15 +742,15 @@ void Generate_Map() {
   }
   END_FOILAGE:
 
-
   int amt_trees = cast(int)AOD.R_Rand(20, 25);
   for ( int i = 0; i != amt_trees; ++ i ){
     int x, y;
     do {
       x = cast(int)AOD.R_Rand(2, map.length);
       y = cast(int)AOD.R_Rand(3, map[0].length);
-    } while ( map[x][y].length == 0 ||
-              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
+      if ( map[x][y].length == 1 && map[x][y][0].R_Tile_Type == Tile_Type.Floor)
+        break;
+    } while ( true );
     switch ( cast(int)(AOD.R_Rand(0, 3)) ) {
       default: break;
       case 0:
@@ -687,42 +775,97 @@ void Generate_Map() {
     do {
       x = cast(int)AOD.R_Rand(2, map.length);
       y = cast(int)AOD.R_Rand(3, map[0].length);
-    } while ( map[x][y].length == 0 ||
-              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
+      if ( map[x][y].length == 1 &&
+           map[x][y][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) break;
+    } while ( true );
     import Entity.Mob;
     AOD.Add(new Mob(x, y));
   }
 
-  int amt_switches = 2;
-  for ( int i = 0; i != amt_switches; ++ i ) {
-    int x, y;
-    bool pass_once = false;
-    DOAGAIN:
-    do {
-      x = cast(int)AOD.R_Rand(2, map.length);
-      y = cast(int)AOD.R_Rand(3, map[0].length);
-    } while ( map[x][y].length == 0 ||
-              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
-    if ( pass_once )
-      AOD.Add(new Prop(x, y, Prop.Type.Switch));
-    else {
-      AOD.Add(new Prop(x, y-1, Prop.Type.Block_Top));
-      AOD.Add(new Prop(x, y, Prop.Type.Block_Bot));
-      pass_once = true;
-      goto DOAGAIN;
+  Entity.Map.Prop top, bot;
+  foreach ( i; 0 .. lmap.length ) {
+    foreach ( j; 0 .. lmap[0].length ) {
+      switch ( lmap[i][j] ){
+        default: break;
+        case 103:
+          top = new Prop(i, j, Prop.Type.Closed_Door_Left);
+          Game_Manager.Add(top);
+        break;
+        case 104:
+          bot = new Prop(i, j, Prop.Type.Closed_Door_Right);
+          Game_Manager.Add(bot);
+        break;
+        case 105:
+          top = new Prop(i, j, Prop.Type.Closed_Door_Top);
+          Game_Manager.Add(top);
+        break;
+        case 106:
+          bot = new Prop(i, j, Prop.Type.Closed_Door_Bot);
+          Game_Manager.Add(bot);
+        break;
+      }
     }
   }
-  { // -- door --
-    do {
-      x = cast(int)AOD.R_Rand(2, map.length);
-      y = cast(int)AOD.R_Rand(3, map[0].length);
-    } while ( map[x][y].length == 0 ||
-              map[x][y][0].R_Tile_Type() != Entity.Map.Tile_Type.Floor );
+
+  foreach ( i; 0 .. lmap.length ) {
+    foreach ( j; 0 .. lmap[0].length ) {
+      if ( lmap[i][j] == 100 ) {
+        Game_Manager.Add(new Prop(i, j-1, Prop.Type.Block_Top));
+        Game_Manager.Add(new Prop(i, j,   Prop.Type.Block_Bot));
+      } else if ( lmap[i][j] == 101 ) {
+        AOD.Add(new Prop(i, j, Prop.Type.Switch, top));
+      } else if ( lmap[i][j] == 102 ) {
+        AOD.Add(new Prop(i, j, Prop.Type.Switch, bot));
+      }
+    }
   }
+  /* { // -- door -- */
+  /*   int x, y; */
+  /*   do { */
+  /*     x = cast(int)AOD.R_Rand(2, map.length); */
+  /*     y = cast(int)AOD.R_Rand(3, map[0].length); */
+  /*     alias M = Game_Manager.map; */
+  /*     if ( M[x][y].length == 1 && */
+  /*          M[x][y  ][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor && */
+  /*          M[x-1][y][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) break; */
+  /*   } while ( true ); */
+  /*   top = new Prop(x, y, Entity.Map.Prop.Type.Closed_Door_Right); */
+  /*   bot = new Prop(x-1, y, Entity.Map.Prop.Type.Closed_Door_Left); */
+  /*   bot.Set_Holder(top); */
+  /*   top.Set_Holder(bot); */
+  /*   Game_Manager.Add(top); */
+  /*   Game_Manager.Add(bot); */
+  /* } */
+  /* int amt_switches = 20; */
+  /* for ( int i = 0; i != amt_switches; ++ i ) { */
+  /*   int x, y; */
+  /*   bool pass_once = false; */
+  /*   DOAGAIN: */
+  /*   do { */
+  /*     x = cast(int)AOD.R_Rand(2, map.length); */
+  /*     y = cast(int)AOD.R_Rand(3, map[0].length); */
+  /*     if ( map[x][y].length == 1 && map[x][y][0].R_Tile_Type == Tile_Type.Floor) */
+  /*       break; */
+  /*   } while ( true ); */
+  /*   if ( pass_once ) */
+  /*     AOD.Add(new Prop(x, y, Prop.Type.Switch, */
+  /*           cast(int)(AOD.R_Rand(0, 2))==0?bot:top)); */
+  /*   else { */
+  /*     Game_Manager.Add(new Prop(x, y-1, Prop.Type.Block_Top)); */
+  /*     Game_Manager.Add(new Prop(x, y,   Prop.Type.Block_Bot)); */
+  /*     pass_once = true; */
+  /*     goto DOAGAIN; */
+  /*   } */
+  /* } */
 
 }
 
 void Update() {
+  if ( restarted ) {
+    Initialize();
+    return;
+  }
+  if ( player is null ) return;
   import std.math;
   auto px = player.R_Tile_Pos.x, py = player.R_Tile_Pos.y;
   int rlx = cast(int)AOD.Util.R_Max(0, px - 15),
@@ -754,14 +897,17 @@ void Update() {
       if ( proj !is null )
         d += pr.R_Light(AOD.Vector(i*32, j*32));
     }
+    foreach ( st; stone_doors ) {
+      d += st.R_Light(AOD.Vector(i*32, j*32));
+    }
     foreach ( k; 0 .. map[i][j].length ) {
       if ( map[i][j][k].R_Tile_Type == Entity.Map.Tile_Type.Mob ) {
         import Entity.Mob;
         auto e = cast(Mob)map[i][j][k];
         e.Shadow_Col(d);
       }
-      map[i][j][k].Set_Colour(d, d, d, 1.0);
+      map[i][j][k].Set_Colour(d, d, d, map[i][j][k].R_Alpha);
     }
   }
-  player.Set_Colour(1.0, 1.0, 1.0, 1.0);
+  /* player.Set_Colour(1.0, 1.0, 1.0, 1.0); */
 }

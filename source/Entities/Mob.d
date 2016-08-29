@@ -5,6 +5,27 @@ static import Game_Manager;
 static import Data;
 import Entity.Projectile;
 
+class MobCorpse : Entity.Map.Tile {
+  int timer;
+public:
+  this(int x, int y) {
+    super(x, y, Entity.Map.Tile_Type.Nil, Data.Layer.Item);
+    timer = cast(int)(3000.0/AOD.R_MS());
+    Set_Sprite(Data.Image.Enemy.dead);
+  }
+  override void Update() {
+    alias M = Game_Manager.map;
+    if ( -- timer <= 0 ) {
+      foreach ( l; 0 .. M[tile_x][tile_y].length )
+        if ( M[tile_x][tile_y][l] is this ) {
+          M[tile_x][tile_y] = AOD.Util.Remove(M[tile_x][tile_y], l);
+          AOD.Remove(this);
+          return;
+        }
+    }
+    Set_Colour(red, red, red, timer/(3000.0/AOD.R_MS()));
+  }
+}
 class Mob : Entity.Map.Tile {
   int think_timer, shoot_timer;
   int Think_timer_start_min = 20,
@@ -21,6 +42,7 @@ class Mob : Entity.Map.Tile {
   bool flip = false;
   bool spawning;
   int spawn_timer;
+  int dead_timer = 0;
 public:
   this(int x, int y) {
     super(x, y, Entity.Map.Tile_Type.Mob, Data.Layer.Mob, false);
@@ -37,22 +59,42 @@ public:
   }
 
   ~this() {
-    // -- DEBUG START
-    import std.stdio : writeln;
-    import std.conv : to;
-    writeln("REMOVING SHADOW");
-    // -- DEBUG END
-    AOD.Remove(shadow);
-    shadow.Set_Visible(false);
   }
 
   void Shadow_Col(float x) {
+    if ( dead_timer > 0 ) return;
     shadow.Set_Colour(x, x, x, 1.0);
     shadow.Set_Visible(x > 0.005);
     Set_Visible(x > 0.005);
   }
+  void Kill() {
+    if ( dead_timer > 0 ) return;
+    dead_timer = 5;
+    Set_Visible(false);
+    AOD.Play_Sound(Data.Sound.monster_dies);
+    AOD.Remove(shadow);
+    shadow.Set_Visible(false);
+    shadow = null;
+    AOD.Add(new MobCorpse(tile_x, tile_y));
+  }
+
+  bool R_Dead() { return dead_timer > 0; }
 
   override void Update() {
+    if ( dead_timer > 0 ) {
+      -- dead_timer;
+      if ( dead_timer == 0 ) {
+        foreach ( t; 0 .. Game_Manager.map[tile_x][tile_y].length ) {
+          if ( Game_Manager.map[tile_x][tile_y][t] is this ) {
+            Game_Manager.map[tile_x][tile_y] =
+              AOD.Util.Remove(Game_Manager.map[tile_x][tile_y], t);
+            AOD.Remove(this);
+            return;
+          }
+        }
+      }
+      return;
+    }
     // -- POSITION SMOOTH
     if ( prev_x != tile_x || prev_y != tile_y ) {
       smooth_scroll += 0.10f;
@@ -118,11 +160,6 @@ public:
     bool is_visible = R_Coloured() && R_Red() > 0.025;
     if ( Game_Manager.player ) {
       if ( is_visible ) {
-        // -- DEBUG START
-        import std.stdio : writeln;
-        import std.conv : to;
-        writeln("VISIBLE");
-        // -- DEBUG END
         auto line = AOD.Util.Bresenham_Line(tile_x, tile_y, px, py);
         for ( int i = 1; i < line.length - 1; ++ i ) {
           int line_x = cast(int)line[i].x, line_y = cast(int)line[i].y;
@@ -149,29 +186,35 @@ public:
       prev_x = tile_x;
       prev_y = tile_y;
       Set_Tile_Pos(gx, gy);
+      smooth_scroll = 0.0f;
       gx -= prev_x;
       gy -= prev_y;
       goal = goal[1 .. $];
     }
     // -- shooting --
-    if ( -- shoot_timer < 0 && is_los_visible && is_visible ) {
+    if ( -- shoot_timer < 0 && is_los_visible && is_visible &&
+          Game_Manager.player.R_Dead() == 0 ) {
       shoot_timer = cast(int)AOD.R_Rand(Shoot_timer_min, Shoot_timer_max);
       auto Type_Mob = Entity.Map.Tile_Type.Mob;
       if ( px - tile_x == 0 ) { // vertic
         if ( py > tile_y ) {
-          auto e=new Projectile(tile_x, tile_y, 0, 1, Type_Mob);
+          auto e=new Projectile(tile_x, tile_y, 0, 1, Type_Mob, this);
           Game_Manager.Add(e);
+          gx = 0; gy = 1;
         } else {
-          auto e=new Projectile(tile_x,tile_y, 0, -1, Type_Mob);
+          auto e=new Projectile(tile_x,tile_y, 0, -1, Type_Mob, this);
           Game_Manager.Add(e);
+          gx = 0; gy = -1;
         }
       } else if ( py - tile_y == 0 ) {
         if ( px > tile_x ) {
-          auto e=new Projectile(tile_x, tile_y, 1, 0, Type_Mob);
+          auto e=new Projectile(tile_x, tile_y, 1, 0, Type_Mob, this);
           Game_Manager.Add(e);
+          gx = 1; gy = 0;
         } else {
-          auto e=new Projectile(tile_x,tile_y, -1, 0, Type_Mob);
+          auto e=new Projectile(tile_x,tile_y, -1, 0, Type_Mob, this);
           Game_Manager.Add(e);
+          gx = 0; gy = 0;
         }
       }
     }

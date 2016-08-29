@@ -42,14 +42,12 @@ import AODCore.render_base;
 */
 class Entity : Render_Base {
 public:
-
   static immutable(float[8]) Vertices = [
     -0.5f, -0.5f,
     -0.5f,  0.5f,
      0.5f, -0.5f,
      0.5f,  0.5f
   ];
-
   /**
 Params:
     _layer = Layer that the entity should be rendered (0 is top)

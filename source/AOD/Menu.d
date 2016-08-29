@@ -116,7 +116,7 @@ class Menu : AOD.Entity {
   immutable( uint ) Button_size = Button.max+1;
   AOD.Entity[Button.max+1] buttons;
   AOD.Entity background;
-  AOD.Entity background_submenu;
+  AOD.Entity background_submenu_credits, background_submenu_controls;
   AOD.Text[] credit_texts,
              controls_text,
              controls_key_text;
@@ -145,6 +145,7 @@ Params:
   credit_img_x  = Distance from left on x-axis for all credit images
   */
   this(AOD.SheetRect img_background, AOD.SheetRect img_background_submenu,
+      AOD.SheetRect img_background_submenu_controls,
        AOD.SheetRect[Button.max+1] img_buttons,
        string[] text_credits, AOD.Entity _add_on_start,
        int button_y, int button_y_it, int credit_y, int credit_y_it,
@@ -159,11 +160,22 @@ Params:
     /* import std.stdio : writeln; */
     /* writeln("Creating menu"); */
     /* writeln("BG POSITION: " ~ cast(string)background.R_Position); */
-    background_submenu = new AOD.Entity;
-    background_submenu.Set_Sprite(img_background_submenu, 1);
-    background_submenu.Set_Size(background_submenu.R_Img_Size());
-    background_submenu.Set_Position(AOD.R_Window_Width/2,AOD.R_Window_Height/2);
-    background_submenu.Set_Visible(0);
+    background_submenu_credits = new AOD.Entity;
+    background_submenu_credits.Set_Sprite(img_background_submenu, 1);
+    background_submenu_credits.Set_Size(
+                                background_submenu_credits.R_Img_Size());
+    background_submenu_credits.Set_Position(AOD.R_Window_Width/2,
+                                           AOD.R_Window_Height/2);
+    background_submenu_credits.Set_Visible(0);
+    background_submenu_credits.Set_Static_Pos(true);
+    background_submenu_controls = new AOD.Entity;
+    background_submenu_controls.Set_Sprite(img_background_submenu_controls, 1);
+    background_submenu_controls.Set_Size(
+                            background_submenu_controls.R_Img_Size());
+    background_submenu_controls.Set_Position(AOD.R_Window_Width/2,
+                                            AOD.R_Window_Height/2);
+    background_submenu_controls.Set_Static_Pos(true);
+    background_submenu_controls.Set_Visible(0);
     import std.stdio;
     /* import std.conv : to; */
     /* writeln(to!string(img_background)); */
@@ -186,6 +198,11 @@ Params:
       credit_texts ~= new AOD.Text(credit_text_x,
                                    cy + cyi*i, text_credits[i]);
       credit_texts[$-1].Set_Visible(0);
+      // -- DEBUG START
+      import std.stdio : writeln;
+      import std.conv : to;
+      writeln(to!string(credit_texts[$-1].R_Position));
+      // -- DEBUG END
     }
 
     // set up controls
@@ -206,35 +223,41 @@ Params:
     controls_key_text ~= new AOD.Text(20, _rh, "Edit controls at config.ini");
     foreach ( c; controls_text ) {
       c.Set_Visible(0);
+      c.Set_Static_Pos(true);
     }
     foreach ( c; controls_key_text ) {
       c.Set_Visible(0);
+      c.Set_Static_Pos(true);
     }
   }
 
   override void Added_To_Realm() {
     foreach ( c; controls_key_text )
       AOD.Add(c);
-    foreach ( c; controls_text )
-      AOD.Add(c);
-    foreach ( c; credit_texts )
-      AOD.Add(c);
-    foreach ( c; buttons )
-      AOD.Add(c);
+    /* foreach ( c; controls_text ) */
+      /* AOD.Add(c); */
+    /* foreach ( c; credit_texts ) */
+      /* AOD.Add(c); */
+    AOD.Add(buttons[0]);
+    AOD.Add(buttons[3]);
+    /* foreach ( c; buttons ) */
+      /* AOD.Add(c); */
     buttons[0].Set_Visible(true);
     AOD.Add(background);
-    AOD.Add(background_submenu);
+    AOD.Add(background_submenu_controls);
+    AOD.Add(background_submenu_credits);
+    AOD.Set_BG_Colour(0, 0, 0);
+    static import Data;
+    AOD.Play_Sound(Data.Sound.bg_music, 2.00f);
   }
 
   ~this() {
-    import Entity.Splashscreen;
-    AOD.Add(new Splash(null));
+    AOD.Add(add_on_start);
   }
 
   private void Flip_Menu() {
     foreach ( b; buttons )
       b.Set_Visible(b.R_Visible^1);
-    background_submenu.Set_Visible(background_submenu.R_Visible^1);
   }
 
   // since an entity can be clickeable even though it is not visible
@@ -247,19 +270,30 @@ Params:
       c.Set_Visible(visible);
     foreach (c; controls_key_text )
       c.Set_Visible(visible);
+    background_submenu_controls.Set_Visible(visible);
+    // -- DEBUG START
+    import std.stdio : writeln;
+    import std.conv : to;
+    writeln(cast(string)(background_submenu_controls.R_Position));
+    // -- DEBUG END
   }
 
   private void Set_Credits_Visibility(bool visible) {
-    foreach ( c; credit_texts )
+    foreach ( c; credit_texts ) {
       c.Set_Visible(visible);
+      // -- DEBUG START
+      import std.stdio : writeln;
+      import std.conv : to;
+      writeln(to!string(c.R_Visible));
+      // -- DEBUG END
+    }
+    background_submenu_credits.Set_Visible(visible);
   }
 
   override void Update() {
     import derelict.sdl2.sdl;
-    if ( Clicked( buttons[Button.Start]) || true ||
+    if ( Clicked( buttons[Button.Start]) ||
          AOD.Input.keystate [SDL_SCANCODE_SPACE] ) {
-      if ( add_on_start !is null )
-        AOD.Add(add_on_start);
       foreach ( b; buttons )
         AOD.Remove(b);
       foreach ( c; controls_text )

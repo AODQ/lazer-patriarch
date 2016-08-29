@@ -69,41 +69,52 @@ class Prop : Tile {
     Closed_Door_Bot   = 9,
     Closed_Door_Left  = 10,
     Closed_Door_Right = 11,
-    Open_Door_Vertic  = 12,
-    Open_Door_Horiz   = 13,
-    Switch            = 14,
-    Moss              = 15,
-    Rock              = 16,
-    Block_Bot         = 17,
-    Block_Top         = 18,
-    Block_Bot_Hilit   = 19,
-    Block_Top_Hilit   = 20,
-    Tree_Top          = 21,
-    Tree_Mid          = 22,
-    Tree_Bot          = 23,
-    Vine_Top          = 24,
-    Vine_Bot          = 25,
-    Statue_Bot        = 26,
-    Statue_Top        = 27,
-    Pillar_Top        = 28,
-    Pillar_Bot        = 29,
-    Arch_Left         = 30,
-    Arch_Right        = 31
+    Closed_Door_Top_H   = 12,
+    Closed_Door_Bot_H   = 13,
+    Closed_Door_Left_H  = 14,
+    Closed_Door_Right_H = 15,
+    Open_Door_Vertic  = 16,
+    Open_Door_Horiz   = 17,
+    Switch            = 18,
+    Moss              = 19,
+    Rock              = 20,
+    Block_Bot         = 21,
+    Block_Top         = 22,
+    Block_Bot_Hilit   = 23,
+    Block_Top_Hilit   = 24,
+    Tree_Top          = 25,
+    Tree_Mid          = 26,
+    Tree_Bot          = 27,
+    Vine_Top          = 28,
+    Vine_Bot          = 29,
+    Statue_Bot        = 30,
+    Statue_Top        = 31,
+    Heart_Pickup      = 32,
+    Pillar_Top        = 33,
+    Pillar_Bot        = 34,
+    Arch_Left         = 35,
+    Arch_Right        = 36
   };
   Type prop_type;
+  Prop holder;
 public:
   override void Post_Update() {}
-  this(int x, int y, Type prop) {
+  Prop R_Holder() { return holder; }
+  void Set_Holder(Prop x) { holder = x; }
+  void Set_Prop_Type(int x) { prop_type = cast(Type)x; }
+  this(int x, int y, Type prop, Prop _holder = null) {
+    holder = _holder;
     prop_type = prop;
     int prop_tex = prop;
     if ( prop == Type.Debris ) {
       prop_tex = cast(int)AOD.R_Rand(0, 7);
     }
-    if (prop == Type.Moss || prop == Type.Vine_Top || prop == Type.Vine_Bot) 
+    if (prop == Type.Moss || prop == Type.Vine_Top || prop == Type.Vine_Bot) {
       super(x, y, Tile_Type.Floor, Data.Layer.Foilage);
-    } else if (prop == Type.Rock ||
-        prop == Type.Block_Bot || prop == Type.Tree_Bot
-                               || prop == Type.Statue_Bot  )
+    } else if (prop == Type.Rock || prop == Type.Block_Bot
+            || prop == Type.Tree_Bot || prop == Type.Statue_Bot
+            || prop == Type.Closed_Door_Top || prop == Type.Closed_Door_Left
+            || prop == Type.Closed_Door_Bot || prop == Type.Closed_Door_Right )
       super(x, y, Tile_Type.Prop, Data.Layer.Block, false);
     else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
               prop == Type.Block_Top || prop == Type.Statue_Top )
@@ -111,6 +122,33 @@ public:
     else
       super(x, y, Tile_Type.Prop, Data.Layer.Item);
     Set_Sprite(Data.Image.props[prop_tex]);
+    Do_Flip();
+  }
+  void Set_Collideable(bool x) {
+    can_be_stepped_on = !x;
+  }
+  void Do_Flip() {
+    if ( prop_type == Type.Closed_Door_Top ||
+         prop_type == Type.Closed_Door_Top_H ) {
+      Set_Collideable(true);
+      Flip_Y();
+    }
+    if ( prop_type == Type.Open_Door_Horiz ||
+         prop_type == Type.Closed_Door_Left ||
+         prop_type == Type.Closed_Door_Right)
+      Set_Rotation(90.0f * (3.14156f/180.0f));
+    if ( prop_type == Type.Closed_Door_Right
+         || prop_type == Type.Closed_Door_Right_H ) {
+      Set_Rotation(270.0f * (3.14156f/180.0f));
+    }
+  }
+  float R_Light(AOD.Vector other) {
+    if ( (prop_type >= Type.Closed_Door_Left_H &&
+          prop_type <= Type.Closed_Door_Right_H)
+          || prop_type == Type.Block_Bot_Hilit
+          || prop_type == Type.Block_Top_Hilit )
+      return 20.0f/position.Distance(other);
+    return 0.0f;
   }
   Type R_Prop_Type() { return prop_type; }
   // block bot -> block top
