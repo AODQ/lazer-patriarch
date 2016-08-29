@@ -78,7 +78,7 @@ public:
     AOD.Add(new MobCorpse(tile_x, tile_y));
   }
 
-  bool R_Dead() { return dead_timer > 0; }
+  override bool R_Dead() { return dead_timer > 0; }
 
   override void Update() {
     if ( dead_timer > 0 ) {

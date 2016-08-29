@@ -325,7 +325,7 @@ public:
       // -- DEBUG START
       import std.stdio : writeln;
       import std.conv : to;
-      writeln("end update, game manager update");
+      /* writeln("end update, game manager update"); */
       // -- DEBUG END
       if ( ended ) {
         destroy(this);
@@ -343,7 +343,7 @@ public:
     // -- DEBUG START
     import std.stdio : writeln;
     import std.conv : to;
-    writeln("end game manager update");
+    /* writeln("end game manager update"); */
     // -- DEBUG END
     // ---- NON AOD CODE -----
     // ---- NON AOD CODE -----
@@ -370,7 +370,7 @@ public:
         // -- DEBUG START
         import std.stdio : writeln;
         import std.conv : to;
-        writeln("render");
+        /* writeln("render"); */
         // -- DEBUG END
         Render(); // render the screen
       }
@@ -378,7 +378,7 @@ public:
       // -- DEBUG START
       import std.stdio : writeln;
       import std.conv : to;
-      writeln("sleep");
+      /* writeln("sleep"); */
       // -- DEBUG END
       { // sleep until temp dt reaches ms_dt
         float temp_dt = accumulated_dt;
@@ -399,7 +399,7 @@ public:
     // -- DEBUG START
     import std.stdio : writeln;
     import std.conv : to;
-    writeln("update objects");
+    /* writeln("update objects"); */
     // -- DEBUG END
     foreach ( l ; objects )
     foreach ( a ; l ) {
@@ -409,7 +409,7 @@ public:
     // -- DEBUG START
     import std.stdio : writeln;
     import std.conv : to;
-    writeln("remov dupes");
+    /* writeln("remov dupes"); */
     // -- DEBUG END
     // find duplicates of removals
     if ( objs_to_rem.length > 1 ) {
@@ -430,7 +430,7 @@ public:
     // -- DEBUG START
     import std.stdio : writeln;
     import std.conv : to;
-    writeln("remove obj");
+    /* writeln("remove obj"); */
     // -- DEBUG END
     // remove objects
     foreach ( rem_it; 0 .. objs_to_rem.length ) {
@@ -451,7 +451,7 @@ public:
     // -- DEBUG START
     import std.stdio : writeln;
     import std.conv : to;
-    writeln("destroy all");
+    /* writeln("destroy all"); */
     // -- DEBUG END
     // destroy everything this frame?
     if ( cleanup_this_frame ) {
@@ -478,7 +478,7 @@ public:
     // -- DEBUG START
     import std.stdio : writeln;
     import std.conv : to;
-    writeln("end update loop");
+    /* writeln("end update loop"); */
     // -- DEBUG END
   }
 

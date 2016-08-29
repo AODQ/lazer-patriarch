@@ -129,7 +129,7 @@ void Generate_Map() {
     }
     return true;
   }
-  bool Generate_Horiz(int sx, int sy, int ex, bool ni) {
+  bool Generate_Horiz(int sx, int sy, int ex) {
     if ( ex < sx ) {
       sx ^= ex;
       ex ^= sx;
@@ -145,11 +145,10 @@ void Generate_Map() {
       if ( tmap[i][sy] == 0 ) {
         tmap[i][sy] = -1;
       }
-      else if ( ni ) return false;
     }
     return true;
   }
-  bool Generate_Verti(int sy, int sx, int ey, bool ni) {
+  bool Generate_Verti(int sy, int sx, int ey) {
     if ( ey < sy ) {
       sy ^= ey;
       ey ^= sy;
@@ -164,48 +163,39 @@ void Generate_Map() {
     for ( int i = sy; i != ey+1; ++ i ) {
       if ( tmap[sx][i] == 0 )
         tmap[sx][i] = -1;
-      else if ( ni ) return false;
     }
     return true;
   }
-  bool Generate_Path(int i, int y, bool ni, ref int px, ref int py,
+  bool Generate_Path(int i, ref int px, ref int py,
                      int width = -1) {
-    if ( i == y ) return 0;
     int srx = trooms_x [ i ] ,
         sry = trooms_y [ i ] ,
         srw = trooms_w [ i ] ,
-        srh = trooms_h [ i ] ,
-        erx = trooms_x [ y ] ,
-        ery = trooms_y [ y ] ,
-        erw = trooms_w [ y ] ,
-        erh = trooms_h [ y ] ;
-    int ox = cast(int)AOD.R_Rand(srx - srw, srx + srw),
-        oy = cast(int)AOD.R_Rand(sry - srh, sry + srh),
-        fx = cast(int)AOD.R_Rand(erx - erw, erx + erw),
-        fy = cast(int)AOD.R_Rand(ery - ery, ery + erh);
+        srh = trooms_h [ i ];
     width = width == -1 ? (AOD.R_Rand(0, 50) > 40 ? 1 : 0) : 0;
+    int amt = cast(int)AOD.R_Rand(12, 18);
     if ( AOD.R_Rand(0, 2) > 1.0f ) { // horiz?
-      px = (erx<srx ? srx + 2 : srx - 2);
-      py = sry;
-      Generate_Horiz(srx, sry, erx, ni);
-      Generate_Verti(sry, erx, ery, ni);
-      Generate_Horiz(srx, sry+1, erx, ni);
-      Generate_Verti(sry, erx+1, ery, ni);
+      int dx = AOD.R_Rand(0, 2) ? 1 : -1;
+      int ox = dx == 1 ? srx + srw : srx - srw ,
+          oy = cast(int)(AOD.R_Rand(sry - srh, sry - srh));
+      px = ox;
+      py = oy;
+      Generate_Horiz(ox, sry,   ox+(amt*dx));
+      Generate_Horiz(ox, sry+1, ox+(amt*dx));
       if ( width ) {
-        Generate_Horiz(srx, sry-1, erx, ni);
-        Generate_Verti(sry, erx-1, ery, ni);
+        Generate_Horiz(ox, sry-1, ox+amt);
       }
       return 0;
     } else {
-      px = srx;
-      py = (ery<sry ? sry + 2 : sry - 2);
-      Generate_Verti(sry, srx, ery, ni);
-      Generate_Horiz(srx, ery, erx, ni);
-      Generate_Verti(sry+1, srx+1, ery-1, ni);
-      Generate_Horiz(srx+1, ery+1, erx-1, ni);
+      int dy = AOD.R_Rand(0, 2) ? 1 : -1;
+      int ox = cast(int)(AOD.R_Rand(srx - srw, sry - srw)),
+          oy = dy == 1 ? sry + srh : sry - srh ;
+      px = ox;
+      py = oy;
+      Generate_Verti(oy, ox,   oy+(amt*dy));
+      Generate_Verti(oy, ox+1, oy+(amt*dy));
       if ( width ) {
-        Generate_Verti(sry+1, srx-1, ery-1, ni);
-        Generate_Horiz(srx+1, ery-1, erx-1, ni);
+        Generate_Verti(oy, ox-1, oy+amt);
       }
       return 1;
     }
@@ -242,9 +232,8 @@ void Generate_Map() {
   // gen rooms
   // -- create first room --
   while ( !Create_Room(0) ) {}
-  while ( !Create_Room(1) ) {}
   int path_x, path_y;
-  bool path_horiz = Generate_Path(1, 0, false, path_x, path_y, 0);
+  bool path_horiz = Generate_Path(0, path_x, path_y, 0);
   int player_sp_x, player_sp_y;
   {// -- add blocks and switch thing --
     lmap[cast(int)(56 - AOD.R_Rand(1, 11))][cast(int)(56 - AOD.R_Rand(1, 11))]
@@ -281,32 +270,6 @@ void Generate_Map() {
   }
 
 
-  /* int rm_amt = cast(int)AOD.R_Rand(15, 30); */
-  /* for ( int rms = 0; rms != rm_amt; ++ rms ) { */
-  /*   if ( !Create_Room(rms) ) { */
-  /*     break; */
-  /*   } */
-  /*   if ( rms != 0 ) */
-  /*     Generate_Path(rms-1, rms, false); */
-  /* } */
-
-  /* uint rand_paths = cast(int)AOD.R_Rand(2, 3); */
-  /* for ( int i = 0; i != rand_paths; ++ i ) { */
-  /*   int x, y; */
-  /*   do { */
-  /*     x = cast(int)AOD.R_Rand(1, trooms_x.length); */
-  /*     y = cast(int)AOD.R_Rand(1, trooms_x.length); */
-  /*   } while ( x != y ); */
-  /*   Generate_Path(i, y, true); */
-  /* } */
-  for(int i=0; i<tmap.length; ++ i) {
-    tmap[i][0]   = -1;
-    tmap[i][$-1] = -1;
-  }
-  for(int i=0; i < tmap[0].length-1; ++i) {
-    tmap[0][i]   = -1;
-    tmap[$-1][i] = -1;
-  }
   // -- DEBUG START
   import std.stdio;
   import std.conv : to;
@@ -819,45 +782,6 @@ void Generate_Map() {
       }
     }
   }
-  /* { // -- door -- */
-  /*   int x, y; */
-  /*   do { */
-  /*     x = cast(int)AOD.R_Rand(2, map.length); */
-  /*     y = cast(int)AOD.R_Rand(3, map[0].length); */
-  /*     alias M = Game_Manager.map; */
-  /*     if ( M[x][y].length == 1 && */
-  /*          M[x][y  ][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor && */
-  /*          M[x-1][y][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) break; */
-  /*   } while ( true ); */
-  /*   top = new Prop(x, y, Entity.Map.Prop.Type.Closed_Door_Right); */
-  /*   bot = new Prop(x-1, y, Entity.Map.Prop.Type.Closed_Door_Left); */
-  /*   bot.Set_Holder(top); */
-  /*   top.Set_Holder(bot); */
-  /*   Game_Manager.Add(top); */
-  /*   Game_Manager.Add(bot); */
-  /* } */
-  /* int amt_switches = 20; */
-  /* for ( int i = 0; i != amt_switches; ++ i ) { */
-  /*   int x, y; */
-  /*   bool pass_once = false; */
-  /*   DOAGAIN: */
-  /*   do { */
-  /*     x = cast(int)AOD.R_Rand(2, map.length); */
-  /*     y = cast(int)AOD.R_Rand(3, map[0].length); */
-  /*     if ( map[x][y].length == 1 && map[x][y][0].R_Tile_Type == Tile_Type.Floor) */
-  /*       break; */
-  /*   } while ( true ); */
-  /*   if ( pass_once ) */
-  /*     AOD.Add(new Prop(x, y, Prop.Type.Switch, */
-  /*           cast(int)(AOD.R_Rand(0, 2))==0?bot:top)); */
-  /*   else { */
-  /*     Game_Manager.Add(new Prop(x, y-1, Prop.Type.Block_Top)); */
-  /*     Game_Manager.Add(new Prop(x, y,   Prop.Type.Block_Bot)); */
-  /*     pass_once = true; */
-  /*     goto DOAGAIN; */
-  /*   } */
-  /* } */
-
 }
 
 void Update() {

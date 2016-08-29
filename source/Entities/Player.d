@@ -75,7 +75,7 @@ public:
     } else
       AOD.Play_Sound(Data.Sound.gramp_hurt[cast(int)AOD.R_Rand(0, $)]);
   }
-  bool R_Dead() { return dead; }
+  override bool R_Dead() { return dead; }
 
   float R_Light(int i, int j, int amt) {
     auto px = tile_x, py = tile_y;

@@ -23,6 +23,7 @@ public:
     Set_Image_Size(AOD.Vector(32, 32));
     Set_Size(32, 32);
   }
+  bool R_Dead() { return false; }
   override void Added_To_Realm() {
     import Game_Manager : map;
     if ( tile_x < map.length && tile_y < map[0].length &&

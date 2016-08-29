@@ -33,7 +33,8 @@ void Seed_Random() {
 
 /** Returns: A random float bot .. top*/
 float R_Rand(float bot, float top) {
-  return uniform(bot, top, gen);
+  if ( bot == top ) return top;
+  return bot < top ? uniform(bot, top, gen) : uniform(top, bot, gen);
 }
 
 /** */

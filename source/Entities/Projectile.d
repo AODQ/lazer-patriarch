@@ -6,7 +6,7 @@ static import Data;
 
 class Projectile : AOD.Entity {
   Entity.Map.Tile_Type caster;
-  AOD.Entity caster_obj;
+  Entity.Map.Tile caster_obj;
   int dx, dy;
   uint sound_handle;
   uint sound_timer;
@@ -18,7 +18,7 @@ public:
   }
 
   this(int x, int y, int _dx, int _dy, Entity.Map.Tile_Type _caster,
-       AOD.Entity _caster_obj) {
+       Entity.Map.Tile _caster_obj) {
     caster_obj = _caster_obj;
     mob = ( _caster == Entity.Map.Tile_Type.Mob );
     x *= 32; y *= 32;
@@ -51,7 +51,7 @@ public:
 
     Game_Manager.Add(
         new Explosion(cast(int)position.x, cast(int)position.y,
-                                                dx, dy, mob, false, caster_obj)
+                                dx, dy, mob, false, caster_obj)
     );
 
   }
@@ -127,7 +127,7 @@ public:
 class Explosion : AOD.Entity {
   AOD.Animation_Player anim_player;
   bool mob;
-  AOD.Entity holder;
+  Entity.Map.Tile holder;
   int dx, dy;
 public:
   float R_Light(AOD.Vector other) {
@@ -136,7 +136,7 @@ public:
                  1.5/(1 + R_Anim_Index)/pos.Distance(other);
   }
   this(int x, int y, int _dx, int _dy, bool _mob, bool type_eye,
-      AOD.Entity _holder = null) {
+      Entity.Map.Tile _holder = null) {
     dx = _dx; dy = _dy;
     mob = _mob;
     holder = _holder;
@@ -166,11 +166,10 @@ public:
     return anim_player.index;
   }
   override void Update() {
-    if ( mob && holder !is null ) {
-      auto e = cast(Entity.Mob.Mob)(holder);
-      if ( e.R_Dead() ) {
+    if ( holder !is null ) {
+      if ( holder.R_Dead() ) {
         holder = null;
-        AOD.Remove(this);
+        Game_Manager.Remove(this);
         return;
       }
     }
