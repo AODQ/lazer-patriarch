@@ -748,22 +748,23 @@ void Generate_Map() {
   Entity.Map.Prop top, bot;
   foreach ( i; 0 .. lmap.length ) {
     foreach ( j; 0 .. lmap[0].length ) {
+      int x = cast(int)i, y = cast(int)j;
       switch ( lmap[i][j] ){
         default: break;
         case 103:
-          top = new Prop(i, j, Prop.Type.Closed_Door_Left);
+          top = new Prop(x, y, Prop.Type.Closed_Door_Left);
           Game_Manager.Add(top);
         break;
         case 104:
-          bot = new Prop(i, j, Prop.Type.Closed_Door_Right);
+          bot = new Prop(x, y, Prop.Type.Closed_Door_Right);
           Game_Manager.Add(bot);
         break;
         case 105:
-          top = new Prop(i, j, Prop.Type.Closed_Door_Top);
+          top = new Prop(x, y, Prop.Type.Closed_Door_Top);
           Game_Manager.Add(top);
         break;
         case 106:
-          bot = new Prop(i, j, Prop.Type.Closed_Door_Bot);
+          bot = new Prop(x, y, Prop.Type.Closed_Door_Bot);
           Game_Manager.Add(bot);
         break;
       }
@@ -772,13 +773,14 @@ void Generate_Map() {
 
   foreach ( i; 0 .. lmap.length ) {
     foreach ( j; 0 .. lmap[0].length ) {
+      int x = cast(int)i, y = cast(int)j;
       if ( lmap[i][j] == 100 ) {
-        Game_Manager.Add(new Prop(i, j-1, Prop.Type.Block_Top));
-        Game_Manager.Add(new Prop(i, j,   Prop.Type.Block_Bot));
+        Game_Manager.Add(new Prop(x, y-1, Prop.Type.Block_Top));
+        Game_Manager.Add(new Prop(x, y,   Prop.Type.Block_Bot));
       } else if ( lmap[i][j] == 101 ) {
-        AOD.Add(new Prop(i, j, Prop.Type.Switch, top));
+        AOD.Add(new Prop(x, y, Prop.Type.Switch, top));
       } else if ( lmap[i][j] == 102 ) {
-        AOD.Add(new Prop(i, j, Prop.Type.Switch, bot));
+        AOD.Add(new Prop(x, y, Prop.Type.Switch, bot));
       }
     }
   }
