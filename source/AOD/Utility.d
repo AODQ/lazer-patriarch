@@ -53,6 +53,8 @@ T Remove(T)(T array, int index) in {
   assert(index >= 0 && index < array.length);
 } body {
   if ( array.length-1 == index ) return array[0 .. index];
+  else if ( index == 0 )
+    return array[0 .. index];
   else {
     return array[0 .. index] ~
            array[index+1 .. $];

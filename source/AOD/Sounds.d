@@ -122,6 +122,15 @@ static:
     Check_AL_Errors() ;
 
     s.format = p_info.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+    if ( p_info.channels == 1 ) {
+      // -- DEBUG START
+      import std.stdio : writeln;
+      import std.conv : to;
+      /* writeln(file_name ~ " is STEREO "); */
+      // -- DEBUG END
+    } else {
+      /* writeln(file_name ~ " is MONO "); */
+    }
     s.freq = p_info.rate;
 
     s.ogg_file = ogg_file;
@@ -242,15 +251,19 @@ private void Main_Sound_Loop() {
             return;
           case ThreadMsg.PlaySample:
             // find empty slot
-            int slot = 0;
+            uint slot = 0;
             for ( ; slot < samples.length; ++ slot ) {
               if ( samples[slot] is null ) break;
             }
-            writeln("slot: " ~ to!string(slot));
+            /* writeln("-------"); */
+            /* writeln("slot: " ~ to!string(slot)); */
             if ( slot == samples.length ) ++ samples.length;
             send(ownerTid, ThreadMsg.QueueID, slot);
-            writeln("ID: " ~ to!string(slot));
+            /* writeln("ID: " ~ to!string(slot)); */
             auto s  = SoundEng.LoadOGG(params[0]);
+            /* writeln("Song: " ~ to!string(params[0])); */
+            /* writeln("Vol: " ~ to!string(params[0])); */
+            /* writeln("-------"); */
             s.index = slot;
             samples[slot] = s;
             // -- initialize song
@@ -261,10 +274,12 @@ private void Main_Sound_Loop() {
             SoundEng.Check_AL_Errors();
             alSourcei(s.source_id, AL_LOOPING, AL_FALSE);
             // -- set position
-            immutable(float)[] position_params = [ to!float (params[1]),
-                                                   to!float (params[2]),
-                                                   to!float (params[3]) ];
+            immutable(float)[] volume_parms    = [ to!float (params[1]) ];
+            immutable(float)[] position_params = [ to!float (params[2]),
+                                                   to!float (params[3]),
+                                                   to!float (params[4]) ];
             alSourcefv(s.source_id, AL_POSITION, position_params.ptr);
+            alSourcefv(s.source_id, AL_GAIN,     volume_parms.ptr);
             SoundEng.Check_AL_Errors();
             // -- play song
             alSourcePlay(s.source_id);
@@ -276,9 +291,23 @@ private void Main_Sound_Loop() {
         switch ( msg ) {
           default: break;
           case ThreadMsg.ChangePosition:
+            writeln("INDEX: " ~ to!string( index ) ~ ", " ~ to!string(params[0]));
             if ( index >= samples.length ) break;
             auto s = samples[index];
             alSourcefv(s.source_id, AL_POSITION, params.ptr);
+            if ( SoundEng.Check_AL_Errors() ) {
+              writeln("Couldn't update sound's position");
+            }
+          break;
+          case ThreadMsg.ChangeVolume:
+            // -- DEBUG START
+            import std.stdio : writeln;
+            import std.conv : to;
+            writeln("INDEX: " ~ to!string( index ) ~ ", " ~ to!string(params[0]));
+            // -- DEBUG END
+            if ( index >= samples.length ) break;
+            auto s = samples[index];
+            alSourcefv(s.source_id, AL_GAIN, &params[0]);
             if ( SoundEng.Check_AL_Errors() ) {
               writeln("Couldn't update sound's position");
             }
@@ -320,7 +349,7 @@ private void Main_Sound_Loop() {
 
 private enum ThreadMsg {
   PlaySample, PauseSample, StopSample,
-  ChangePosition,
+  ChangePosition, ChangeVolume,
   StopAllSamples, End,
 
   QueueID
@@ -353,7 +382,8 @@ static: public:
     Return:
       Index to the given handle
   */
-  uint Play_Sound(uint handle, float x = 0.0f, float y = 0.0f, float z = 0.0f)
+  uint Play_Sound(uint handle, float volume = 1.0f,
+                  float x = 0.0f, float y = 0.0f, float z = 0.0f)
   in {
     assert(handle >= 0 && handle < sounds.length);
   } body {
@@ -364,10 +394,11 @@ static: public:
     immutable(string) sx = to!string(x);
     immutable(string) sy = to!string(y);
     immutable(string) sz = to!string(z);
+    immutable(string) v  = to!string(volume);
     /* writeln("playing sound"); */
-    send(SoundEng.thread_id, ThreadMsg.PlaySample, [s, sx, sy, sz]);
+    send(SoundEng.thread_id, ThreadMsg.PlaySample, [s, v, sx, sy, sz]);
     Update(5000);
-    /* writeln("Using index: " ~ to!string(handle)); */
+    /* writeln("Using index: " ~ to!string(cur_slot)); */
     return cur_slot;
   }
 
@@ -393,6 +424,17 @@ static: public:
     import std.concurrency;
     immutable(float) h = cast(immutable( float ))(handle);
     send(SoundEng.thread_id, ThreadMsg.ChangePosition, [h, x, y, z]);
+  }
+
+  /**
+    Changes the volume of the sound from given handle (out of 1.00)
+  */
+  void Change_Sound_Volume(immutable ( uint  ) handle,
+                           immutable ( float ) volume ) {
+    import std.concurrency;
+    immutable(float) h = cast(immutable( float ))(handle);
+    immutable(float) v = cast(immutable( float ))(volume);
+    send(SoundEng.thread_id, ThreadMsg.ChangePosition, [h, v]);
   }
 
   /** Stops all sounds
@@ -422,7 +464,7 @@ static: public:
             import std.conv;
             cur_slot = index;
             import std.stdio;
-            writeln("Received slot index: " ~ to!string ( cur_slot ));
+            /* writeln("Received slot index: " ~ to!string ( cur_slot )); */
           break;
         }
       }

@@ -255,6 +255,16 @@ public:
     return "< " ~ to!string(x) ~ ", " ~ to!string(y) ~ " >";
   }
 
+  override int opCmp(Object o) {
+    return super.opCmp(o);
+  }
+
+  int opCmp(Node other) {
+    if ( f < other.f ) return -1;
+    if ( f > other.f ) return  1;
+    return 0;
+  }
+
   //                      utility methods
 
   /**

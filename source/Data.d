@@ -5,13 +5,15 @@ enum Layer {
   UI = 20,
   Front_Wall = 31,
   Front_Prop = 32,
+  Explosion = 33,
   Player = 33,
   Block  = 34,
-  Mob    = 35,
-  Projectile = 36,
+  Mob    = 33,
+  Projectile = 33,
   Item   = 37,
   Foilage   = 38,
-  Floor  = 39
+  Shadow = 39,
+  Floor  = 40
 }
 class Menu {
 public: static:
@@ -61,55 +63,130 @@ public: static:
   class Player {
   public: static:
     enum Dir { Down = 0, Up = 1, Side = 2 };
-    AOD.Animation[3] walk, push, shoot;
-    AOD.Animation explosion;
+    AOD.Animation[3] walk, push;
+    AOD.Animation[2] proj_explosion;
+    AOD.Animation spawn;
+    AOD.SheetRect proj_vert, proj_horiz, shadow, dead;
+  }
+  class Enemy{
+  public: static:
+    enum Dir { Down = 0, Up = 1, Side = 2 };
+    AOD.Animation[3] walk;
+    AOD.Animation[2] proj_explosion;
+    AOD.Animation spawn;
+    AOD.SheetRect proj_vert, proj_horiz, shadow, dead;
   }
 
   enum MapGrid {
     // ---- wall
-    wall_ctl = -100, wall_ctr = -101, wall_cll = -102, wall_clr = -103,
+    wall_ctl = -100,
+    wall_ctr = -101,
+    wall_cll = -102,
+    wall_clr = -103,
 
-    wall_b = -104, wall_l = -105, wall_r = -106, wall_t = -107,
+    wall_b = -104,
+    wall_l = -105,
+    wall_r = -106,
+    wall_t = -107,
 
-    wall_ptl = -108, wall_ptr = -109, wall_pll = -110, wall_plr = -111,
+    wall_ptl = -108,
+    wall_ptr = -109,
+    wall_pll = -110,
+    wall_plr = -111,
 
-    brick = -112, brick_l = -113, brick_r = -114,
+    brick = -112,
+    brick_l = -113,
+    brick_r = -114,
 
-    hall_vert = -115, hall_horiz = -116, hall_capl = -117, hall_capr = -118,
-    hall_capu = -119, hall_capd  = -120,
+    hall_vert = -115,
+    hall_horiz = -116,
+    hall_capl = -117,
+    hall_capr = -118,
+    hall_capu = -119,
+    hall_capd  = -120,
+
+    hall_ctl = -121,
+    hall_ctr = -122,
+    hall_clr = -123,
+    hall_cll = -124,
+
+    empty    = -125,
 
     // ---- floor
-    floor = -200, floor_left = -201, floor_right = -202, floor_up = -203,
+    floor = -200,
+    floor_left = -201,
+    floor_right = -202,
+    floor_up = -203,
     floor_down = -204,
 
-    floor_tl = -205, floor_tr = -206, floor_ll = -207, floor_lr = -208,
+    floor_tl = -205,
+    floor_tr = -206,
+    floor_ll = -207,
+    floor_lr = -208,
 
-    floor_stl = -209, floor_str = -210, floor_sll = -211, floor_slr = -212,
+    floor_stl = -209,
+    floor_str = -210,
+    floor_sll = -211,
+    floor_slr = -212,
 
-    floor_vert = -213, floor_horiz = -214,
+    floor_vert = -213,
+    floor_horiz = -214,
 
-    floor_splittl = -215, floor_splittr = -216
+    floor_splittl = -215,
+    floor_splittr = -216
   };
-  AOD.SheetRect[] walls, floors, mobs, props;
+  AOD.SheetRect[] walls, floors, props;
   AOD.SheetRect black;
   AOD.SheetRect player;
-  AOD.SheetContainer HUD, projectile;
+  AOD.SheetContainer HUD;
   void Initialize() {
-    auto sheet =AOD.SheetContainer("assets/grampion.png");
+    auto sheet = AOD.SheetContainer("assets/grampion.png");
     auto Gen_SR(int x, int y) {
-      return AOD.SheetRect(sheet, x*32, y*32, x*32 + 33, y*32 + 33);
+      return AOD.SheetRect(sheet, x*32, y*32, x*32 + 32, y*32 + 32);
     }
     auto Gen_PSR(int x, int y ) {
-      return AOD.SheetRect(sheet, x*32, y*32, x*32 + 33, y*32 + 33);
+      return AOD.SheetRect(sheet, x*32, y*32, x*32 + 32, y*32 + 32);
     }
     foreach ( i; 0 .. Player.Dir.max+1 ) {
       Player.walk[i] = new AOD.Animation (AOD.Animation.Type.Linear,
          [Gen_PSR(0,i  ),Gen_PSR(1,i  ),Gen_PSR(2,i  )],
-         cast(int)(150.0f/AOD.R_MS()));
+         cast(int)(200.0f/AOD.R_MS()));
       Player.push[i] = new AOD.Animation (AOD.Animation.Type.Linear,
          [Gen_PSR(0,i+3),Gen_PSR(1,i+3),Gen_PSR(2,i+3)],
-         cast(int)(150.0f/AOD.R_MS()));
+         cast(int)(100.0f/AOD.R_MS()));
     }
+    Player.proj_explosion = [ new AOD.Animation(AOD.Animation.Type.Linear,
+         [Gen_PSR(3, 0), Gen_PSR(4, 0), Gen_PSR(5, 0), Gen_PSR(6, 0),
+          Gen_PSR(7, 0), Gen_PSR(8, 0)], cast(int)(75.0f/AOD.R_MS())),
+       new AOD.Animation(AOD.Animation.Type.Linear,
+         [Gen_PSR(3, 2), Gen_PSR(4, 2), Gen_PSR(5, 2), Gen_PSR(6, 2),
+          Gen_PSR(7, 2)], cast(int)(150.0f/AOD.R_MS()))
+    ];
+    Player.spawn = new AOD.Animation(AOD.Animation.Type.Linear,
+        [ Gen_PSR(3, 3), Gen_PSR(4, 3), Gen_PSR(5, 3), Gen_PSR(6, 3),
+          Gen_PSR(7, 3), Gen_PSR(8, 3) ], cast(int)(100.0f/AOD.R_MS()));
+    Player.proj_vert = Gen_PSR(3, 1); Player.proj_horiz = Gen_PSR(4, 1);
+    Player.shadow    = Gen_PSR(3, 5);
+
+    sheet = AOD.SheetContainer("assets/enemy.png");
+    foreach ( i; 0 .. Enemy.Dir.max+1 ) {
+      Enemy.walk[i] = new AOD.Animation (AOD.Animation.Type.Linear,
+         [Gen_PSR(0,i  ),Gen_PSR(1,i  ),Gen_PSR(2,i  )],
+         cast(int)(200.0f/AOD.R_MS()));
+    }
+    Enemy.proj_explosion = [ new AOD.Animation(AOD.Animation.Type.Linear,
+         [Gen_PSR(3, 0), Gen_PSR(4, 0), Gen_PSR(5, 0), Gen_PSR(6, 0),
+          Gen_PSR(7, 0), Gen_PSR(8, 0)], cast(int)(75.0f/AOD.R_MS())),
+       new AOD.Animation(AOD.Animation.Type.Linear,
+         [Gen_PSR(3, 2), Gen_PSR(4, 2), Gen_PSR(5, 2), Gen_PSR(6, 2),
+          Gen_PSR(7, 2)], cast(int)(150.0f/AOD.R_MS()))
+    ];
+    Enemy.spawn = new AOD.Animation(AOD.Animation.Type.Linear,
+        [ Gen_PSR(3, 3), Gen_PSR(4, 3), Gen_PSR(5, 3), Gen_PSR(6, 3),
+          Gen_PSR(7, 3), Gen_PSR(8, 3) ], cast(int)(100.0f/AOD.R_MS()));
+    Enemy.proj_vert = Gen_PSR(3, 1); Enemy.proj_horiz = Gen_PSR(4, 1);
+    Enemy.shadow    = Gen_PSR(3, 5);
+
     sheet = AOD.SheetContainer("assets/tset_wall.png");
     walls = [
       Gen_SR(3, 0), Gen_SR(4, 0), Gen_SR(3, 1), Gen_SR(4, 1), // corners
@@ -117,16 +194,25 @@ public: static:
       Gen_SR(0, 0), Gen_SR(2, 0), Gen_SR(0, 2), Gen_SR(2, 2), // pokers
       Gen_SR(7, 1), Gen_SR(6, 1), Gen_SR(8, 1), // bricks
       Gen_SR(0, 4), Gen_SR(0, 4), Gen_SR(3, 5), Gen_SR(3, 5),  // hall
-      Gen_SR(0, 5), Gen_SR(0, 5)                               // hall
+      Gen_SR(0, 5), Gen_SR(0, 5),                              // hall
+      Gen_SR(2, 4), Gen_SR(3, 4), Gen_SR(4, 4), Gen_SR(5, 4),  // hall corn
+      Gen_SR(1, 1)
     ];
     sheet = AOD.SheetContainer("assets/tset_props.png");
     props = [
       Gen_SR(0, 0), Gen_SR(1, 0), Gen_SR(2, 0), Gen_SR(3, 0),// debris
       Gen_SR(0, 1), Gen_SR(1, 1), Gen_SR(2, 1), Gen_SR(3, 1),// debris
-      Gen_SR(5, 0), Gen_SR(4, 0), Gen_SR(4, 0), Gen_SR(4, 0),// door
+      Gen_SR(5, 0), Gen_SR(4, 0), Gen_SR(4, 0), Gen_SR(4, 0),Gen_SR(4, 0),//dor
       Gen_SR(4, 1), Gen_SR(1, 3),
-      Gen_SR(1, 4), Gen_SR(3, 2), Gen_SR(3, 3), Gen_SR(0, 2),
-      Gen_SR(0, 3), Gen_SR(0, 4), Gen_SR(2, 2), Gen_SR(2, 3)
+      Gen_SR(1, 4),
+
+      Gen_SR(3, 3), Gen_SR(3, 2),
+      Gen_SR(4, 3), Gen_SR(4, 2),
+
+      Gen_SR(0, 2),
+      Gen_SR(0, 3), Gen_SR(0, 4), Gen_SR(2, 2), Gen_SR(2, 3),
+
+      Gen_SR(5, 3), Gen_SR(5, 2)
     ];
     sheet = AOD.SheetContainer("assets/tset_floor.png");
     floors = [
@@ -139,51 +225,35 @@ public: static:
     player = AOD.SheetRect(sheet, 0, 0, 32, 32);
     black = AOD.SheetRect(sheet, 32, 0, 64, 32);
     HUD = AOD.SheetContainer("assets/HUD.png");
-    sheet = AOD.SheetContainer("assets/tset_mob.png");
-    projectile = AOD.SheetContainer("assets/projectile.png");
-    mobs = [
-      AOD.SheetRect(sheet , 0   , 0 , 32  , 32) ,
-      AOD.SheetRect(sheet , 32  , 0 , 64  , 32) ,
-      AOD.SheetRect(sheet , 64  , 0 , 96  , 32) ,
-      AOD.SheetRect(sheet , 96  , 0 , 128 , 32) ,
-      AOD.SheetRect(sheet , 128 , 0 , 160 , 32) ,
-
-      AOD.SheetRect(sheet , 0   , 32 , 32  , 64) ,
-      AOD.SheetRect(sheet , 32  , 32 , 64  , 64) ,
-      AOD.SheetRect(sheet , 64  , 32 , 96  , 64) ,
-      AOD.SheetRect(sheet , 96  , 32 , 128 , 64) ,
-      AOD.SheetRect(sheet , 128 , 32 , 160 , 64) ,
-
-      AOD.SheetRect(sheet , 0   , 64 , 32  , 96) ,
-      AOD.SheetRect(sheet , 32  , 64 , 64  , 96) ,
-      AOD.SheetRect(sheet , 64  , 64 , 96  , 96) ,
-      AOD.SheetRect(sheet , 96  , 64 , 128 , 96) ,
-      AOD.SheetRect(sheet , 128 , 64 , 160 , 96) ,
-
-      AOD.SheetRect(sheet , 0   , 96 , 32  , 128) ,
-      AOD.SheetRect(sheet , 32  , 96 , 64  , 128) ,
-      AOD.SheetRect(sheet , 64  , 96 , 96  , 128) ,
-      AOD.SheetRect(sheet , 96  , 96 , 128 , 128) ,
-      AOD.SheetRect(sheet , 128 , 96 , 160 , 128) ,
-
-      AOD.SheetRect(sheet , 0   , 128 , 32  , 160) ,
-      AOD.SheetRect(sheet , 32  , 128 , 64  , 160) ,
-      AOD.SheetRect(sheet , 64  , 128 , 96  , 160) ,
-      AOD.SheetRect(sheet , 96  , 128 , 128 , 160) ,
-      AOD.SheetRect(sheet , 128 , 128 , 160 , 160) ,
-
-      AOD.SheetRect(sheet , 0   , 128 , 32  , 160) ,
-      AOD.SheetRect(sheet , 32  , 128 , 64  , 160) ,
-      AOD.SheetRect(sheet , 64  , 128 , 96  , 160) ,
-      AOD.SheetRect(sheet , 96  , 128 , 128 , 160) ,
-      AOD.SheetRect(sheet , 128 , 128 , 160 , 160)
-    ];
   }
 }
 
 class Sound {
 public: static:
+  uint block_move, spawn, door_open, gramp_dies, stage_complete, monster_dies,
+       laser_hit, laser_fire, switch_activate, gramp_push, bg_music;
+  uint[3] gramp_hurt, step;
   void Initialize() {
-
+    block_move      = AOD.Load_Sound("assets/sounds/block-move.ogg"      ) ;
+    spawn           = AOD.Load_Sound("assets/sounds/spawn.ogg"           ) ;
+    door_open       = AOD.Load_Sound("assets/sounds/door-open.ogg"       ) ;
+    gramp_dies      = AOD.Load_Sound("assets/sounds/gramp-dies.ogg"      ) ;
+    stage_complete  = AOD.Load_Sound("assets/sounds/stage-complete.ogg"  ) ;
+    monster_dies    = AOD.Load_Sound("assets/sounds/monster-dies.ogg"    ) ;
+    laser_hit       = AOD.Load_Sound("assets/sounds/laser-hit.ogg"       ) ;
+    laser_fire      = AOD.Load_Sound("assets/sounds/laser-fire.ogg"      ) ;
+    switch_activate = AOD.Load_Sound("assets/sounds/switch-activate.ogg" ) ;
+    gramp_push      = AOD.Load_Sound("assets/sounds/gramp-push.ogg"      ) ;
+    bg_music = AOD.Load_Sound("assets/sounds/background-music.ogg");
+    gramp_hurt = [
+      AOD.Load_Sound  ("assets/sounds/gramp_hurt1.ogg"),
+      AOD.Load_Sound  ("assets/sounds/gramp_hurt2.ogg"),
+      AOD.Load_Sound  ("assets/sounds/gramp_hurt3.ogg")
+    ];
+    step = [
+      AOD.Load_Sound  ("assets/sounds/step1.ogg"),
+      AOD.Load_Sound  ("assets/sounds/step2.ogg"),
+      AOD.Load_Sound  ("assets/sounds/step2.ogg")
+    ];
   }
 }

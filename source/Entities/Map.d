@@ -25,7 +25,9 @@ public:
   }
   override void Added_To_Realm() {
     import Game_Manager : map;
-    map[tile_x][tile_y] ~= this;
+    if ( tile_x < map.length && tile_y < map[0].length &&
+         tile_x >= 0 && tile_y >= 0 )
+      map[tile_x][tile_y] ~= this;
   }
   override void Post_Update() {
     Set_Position(tile_x*32 + 16, tile_y*32 + 16);
@@ -74,18 +76,23 @@ class Prop : Tile {
     Rock              = 16,
     Block_Bot         = 17,
     Block_Top         = 18,
-    Tree_Top          = 19,
-    Tree_Mid          = 20,
-    Tree_Bot          = 21,
-    Vine_Top          = 22,
-    Vine_Bot          = 23,
-    Pillar_Top        = 24,
-    Pillar_Bot        = 25,
-    Arch_Left         = 26,
-    Arch_Right        = 27
+    Block_Bot_Hilit   = 19,
+    Block_Top_Hilit   = 20,
+    Tree_Top          = 21,
+    Tree_Mid          = 22,
+    Tree_Bot          = 23,
+    Vine_Top          = 24,
+    Vine_Bot          = 25,
+    Statue_Bot        = 26,
+    Statue_Top        = 27,
+    Pillar_Top        = 28,
+    Pillar_Bot        = 29,
+    Arch_Left         = 30,
+    Arch_Right        = 31
   };
   Type prop_type;
 public:
+  override void Post_Update() {}
   this(int x, int y, Type prop) {
     prop_type = prop;
     int prop_tex = prop;
@@ -94,12 +101,12 @@ public:
     }
     if (prop == Type.Moss || prop == Type.Vine_Top || prop == Type.Vine_Bot) 
       super(x, y, Tile_Type.Floor, Data.Layer.Foilage);
-    
-    else if (prop == Type.Closed_Door_Bot || prop == Type.Rock ||
-        prop == Type.Block_Bot || prop == Type.Tree_Bot )
+    } else if (prop == Type.Rock ||
+        prop == Type.Block_Bot || prop == Type.Tree_Bot
+                               || prop == Type.Statue_Bot  )
       super(x, y, Tile_Type.Prop, Data.Layer.Block, false);
     else if ( prop == Type.Tree_Top || prop == Type.Tree_Mid ||
-              prop == Type.Block_Top )
+              prop == Type.Block_Top || prop == Type.Statue_Top )
       super(x, y, Tile_Type.Prop, Data.Layer.Front_Prop);
     else
       super(x, y, Tile_Type.Prop, Data.Layer.Item);

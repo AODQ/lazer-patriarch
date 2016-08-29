@@ -312,8 +312,9 @@ alias Load_Sound = AODCore.sound.Sound.Load_Sound;
 alias Play_Sound = AODCore.sound.Sound.Play_Sound;
 alias Stop_Sound = AODCore.sound.Sound.Stop_Sound;
 class Sound {
-  alias Change_Sample_Position = AODCore.sound.Sound.Change_Sound_Position;
-  alias Clean_Up               = AODCore.sound.Sound.Clean_Up;
+  alias Change_Sound_Position = AODCore.sound.Sound.Change_Sound_Position;
+  alias Clean_Up              = AODCore.sound.Sound.Clean_Up;
+  alias Change_Sound_Volume   = AODCore.sound.Sound.Change_Sound_Volume;
 }
 
 
