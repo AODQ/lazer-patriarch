@@ -18,7 +18,7 @@ public:
     if ( -- timer <= 0 ) {
       foreach ( l; 0 .. M[tile_x][tile_y].length )
         if ( M[tile_x][tile_y][l] is this ) {
-          M[tile_x][tile_y] = AOD.Util.Remove(M[tile_x][tile_y], l);
+          M[tile_x][tile_y] = AOD.Util.Remove(M[tile_x][tile_y], cast(int)l);
           AOD.Remove(this);
           return;
         }
@@ -87,7 +87,7 @@ public:
         foreach ( t; 0 .. Game_Manager.map[tile_x][tile_y].length ) {
           if ( Game_Manager.map[tile_x][tile_y][t] is this ) {
             Game_Manager.map[tile_x][tile_y] =
-              AOD.Util.Remove(Game_Manager.map[tile_x][tile_y], t);
+              AOD.Util.Remove(Game_Manager.map[tile_x][tile_y], cast(int)t);
             AOD.Remove(this);
             return;
           }

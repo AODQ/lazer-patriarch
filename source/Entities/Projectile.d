@@ -163,7 +163,7 @@ public:
     Set_Position(x, y);
   }
   int R_Anim_Index() {
-    return anim_player.index;
+    return cast(int)anim_player.index;
   }
   override void Update() {
     if ( mob && holder !is null ) {
