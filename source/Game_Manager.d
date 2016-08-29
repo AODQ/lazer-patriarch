@@ -177,7 +177,7 @@ void Generate_Map() {
     if ( AOD.R_Rand(0, 2) > 1.0f ) { // horiz?
       int dx = AOD.R_Rand(0, 2) ? 1 : -1;
       int ox = dx == 1 ? srx + srw : srx - srw ,
-          oy = cast(int)(AOD.R_Rand(sry - srh, sry - srh));
+          oy = cast(int)(AOD.R_Rand(sry - srh, sry + srh));
       px = ox;
       py = oy;
       Generate_Horiz(ox, sry,   ox+(amt*dx));
@@ -188,7 +188,7 @@ void Generate_Map() {
       return 0;
     } else {
       int dy = AOD.R_Rand(0, 2) ? 1 : -1;
-      int ox = cast(int)(AOD.R_Rand(srx - srw, sry - srw)),
+      int ox = cast(int)(AOD.R_Rand(srx - srw, sry + srw)),
           oy = dy == 1 ? sry + srh : sry - srh ;
       px = ox;
       py = oy;
@@ -790,7 +790,14 @@ void Generate_Map() {
         import std.conv : to;
         writeln("BOT: " ~ to!string(bot));
         // -- DEBUG END
-        AOD.Add(new Prop(x, y, Prop.Type.Switch, bot));
+        auto e = new Prop(x, y, Prop.Type.Switch, bot);
+        AOD.Add(e);
+        /// ----- debug ----
+        import std.stdio : writeln;
+        import std.conv : to;
+        writeln(e.R_Holder());
+        
+        /// ----- debug ----
       }
     }
   }
