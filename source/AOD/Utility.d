@@ -28,7 +28,11 @@ private Mt19937 gen;
 void Seed_Random() {
   import std.algorithm.iteration : map;
   import std.range : repeat;
-  gen.seed(map!((a) => unpredictableSeed)(repeat(0)));
+  uint seed = unpredictableSeed;
+  import std.stdio;
+  import std.conv : to;
+  writeln("SEED: " ~ to!string(seed));
+  gen.seed(seed);
 }
 
 /** Returns: A random float bot .. top*/
