@@ -28,6 +28,8 @@ class Player : Entity.Map.Tile {
   float block_move_timer;
   int death_timer = 0;
   bool dead = false;
+  float mob_timer;
+  float mob_timer_max;
 public:
   this(int x, int y) {
     super(x, y, Entity.Map.Tile_Type.Player, Data.Layer.Player, false);
@@ -42,6 +44,8 @@ public:
     prev_x = x; prev_y = y+1;
     smooth_scroll = 0.0f;
     spawning = 1;
+    mob_timer_max = 13000.0f/AOD.R_MS();
+    mob_timer = mob_timer_max;
     anim_player.Set(Data.Image.Player.spawn);
     Set_Visible(false);
     spawn_timer = cast(int)(1000.0f/AOD.R_MS());
@@ -61,6 +65,15 @@ public:
       h.Set_Position(AOD.R_Window_Width/2 - 44 + 22 * hi, 18/2);
       AOD.Add(h);
     }
+  }
+
+  AOD.Entity New_Heart() {
+    auto h = new AOD.Entity(Data.Layer.UIT);
+    h.Set_Sprite(Image.props[Prop.Type.Heart_Pickup]);
+    h.Set_Static_Pos(true);
+    h.Set_Position(AOD.R_Window_Width/2 - 44 + 22 * health.length, 18/2);
+    AOD.Add(h);
+    return h;
   }
 
   void Damage() {
@@ -128,6 +141,7 @@ public:
         prev_x = tile_x;
         prev_y = tile_y;
         if ( set_block_hilite ) {
+          AOD.Play_Sound(Data.Sound.switch_activate);
           grabbed_bot.Set_Prop_Type(Prop.Type.Block_Bot_Hilit);
           grabbed_top.Set_Prop_Type(Prop.Type.Block_Top_Hilit);
           grabbed_bot.Set_Sprite(Data.Image.props[grabbed_bot.R_Prop_Type]);
@@ -148,7 +162,39 @@ public:
             }
           }
         }
+        alias M = Game_Manager.map;
+        if ( health.length != 5 ) {
+          foreach ( i; 0 .. M[tile_x][tile_y].length ) {
+            if ( M[tile_x][tile_y][i].R_Tile_Type == Tile_Type.Prop ) {
+              auto e = cast(Prop)(M[tile_x][tile_y][i]);
+              if ( e.R_Prop_Type == Prop.Type.Heart_Pickup ) {
+                AOD.Remove(e);
+                AOD.Play_Sound(Data.Sound.health);
+                M[tile_x][tile_y] = AOD.Util.Remove(M[tile_x][tile_y], i);
+                health ~= New_Heart();
+                break;
+              }
+            }
+          }
+        }
         set_block_hilite = false;
+      }
+    }
+    if ( -- mob_timer <= 0 ) {
+      if ( mob_timer_max > 1000.0f/AOD.R_MS() )
+        mob_timer_max -= 10;
+      mob_timer = mob_timer_max;
+      alias M = Game_Manager.map;
+      for ( int i = 0; i != 3; ++ i ){
+        int x, y;
+        do {
+          x = cast(int)AOD.R_Rand(2, M.length);
+          y = cast(int)AOD.R_Rand(3, M[0].length);
+          if ( M[x][y].length == 1 &&
+               M[x][y][0].R_Tile_Type() == Entity.Map.Tile_Type.Floor ) break;
+        } while ( true );
+        import Entity.Mob;
+        AOD.Add(new Mob(x, y));
       }
     }
     if ( dead ) {
@@ -253,6 +299,10 @@ public:
       }
       return true;
     }
+    if ( grabbed_bot is null ) {
+      grabbed_dy = 0;
+      grabbed_dx = 0;
+    }
 
     import Game_Manager : map;
     /** check grab */
@@ -260,7 +310,7 @@ public:
       walk_timer = grabbed_bot ? Pull_timer_start : Walk_timer_start;
       blocked = !Valid_Position(tile_x+dx, tile_y+dy, dx, dy);
       if ( !blocked ) {
-        if ( (dx != 0 ) || (dy != 0 ) ) {
+        if ( (dx != 0 && grabbed_dy == 0 ) || (dy != 0 && grabbed_dx == 0 ) ) {
           smooth_scroll = 0.0f;
           prev_x = tile_x;
           prev_y = tile_y;
@@ -318,6 +368,9 @@ public:
                 grabbed_dx = cast(int)(tile_x - c.R_Tile_Pos.x);
                 grabbed_dy = cast(int)(tile_y - c.R_Tile_Pos.y);
                 break;
+              }
+              if ( c.R_Prop_Type() == Entity.Map.Prop.Type.Statue_Bot ) {
+                Game_Manager.Next_Level();
               }
             }
           }

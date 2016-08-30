@@ -159,7 +159,7 @@ public: static:
          cast(int)(200.0f/AOD.R_MS()));
       Player.push[i] = new AOD.Animation (AOD.Animation.Type.Linear,
          [Gen_PSR(0,i+3),Gen_PSR(1,i+3),Gen_PSR(2,i+3)],
-         cast(int)(100.0f/AOD.R_MS()));
+         cast(int)(300.0f/AOD.R_MS()));
     }
     Player.proj_explosion = [ new AOD.Animation(AOD.Animation.Type.Linear,
          [Gen_PSR(3, 0), Gen_PSR(4, 0), Gen_PSR(5, 0), Gen_PSR(6, 0),
@@ -243,7 +243,8 @@ public: static:
 class Sound {
 public: static:
   uint spawn, door_open, gramp_dies, stage_complete, monster_dies,
-       laser_hit, laser_fire, switch_activate, gramp_push, bg_music;
+       laser_hit, laser_fire, switch_activate, gramp_push, bg_music,
+       monster_hit, monster_fire, health;
   uint[3] gramp_hurt, step;
   uint[10] block_move;
   void Initialize() {
@@ -254,8 +255,11 @@ public: static:
     monster_dies    = AOD.Load_Sound("assets/sounds/monster-dies.ogg"    ) ;
     laser_hit       = AOD.Load_Sound("assets/sounds/laser-hit.ogg"       ) ;
     laser_fire      = AOD.Load_Sound("assets/sounds/laser-fire.ogg"      ) ;
+    monster_hit     = AOD.Load_Sound("assets/sounds/monster-hit.ogg"       ) ;
+    monster_fire    = AOD.Load_Sound("assets/sounds/monster-fire.ogg"      ) ;
     switch_activate = AOD.Load_Sound("assets/sounds/switch-activate.ogg" ) ;
     gramp_push      = AOD.Load_Sound("assets/sounds/gramp-push.ogg"      ) ;
+    health          = AOD.Load_Sound("assets/sounds/pick-health.pgg");
     bg_music = AOD.Load_Sound("assets/sounds/background-music.ogg");
     gramp_hurt = [
       AOD.Load_Sound  ("assets/sounds/gramp-hurt1.ogg"),

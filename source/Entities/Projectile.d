@@ -23,7 +23,8 @@ public:
     mob = ( _caster == Entity.Map.Tile_Type.Mob );
     x *= 32; y *= 32;
     x += 16; y += 16;
-    sound_handle = AOD.Play_Sound(Data.Sound.laser_fire);
+    sound_handle = !mob ? AOD.Play_Sound(Data.Sound.laser_fire) :
+                         AOD.Play_Sound(Data.Sound.monster_fire);
     int l = cast(int)Data.Layer.Projectile;
     sound_timer = cast(int)(1041/AOD.R_MS());
     dx = _dx; dy = _dy;
@@ -155,7 +156,7 @@ public:
       super(Data.Layer.Explosion - 2*cast(int)(dx!=0));
     /* auto ix = R_Position.x - Game_Manager.player.R_Position.x, */
          /* iy = R_Position.y - Game_Manager.player.R_Position.y; */
-    AOD.Play_Sound(Data.Sound.laser_hit);
+    AOD.Play_Sound(!mob ? Data.Sound.laser_hit : Data.Sound.monster_hit);
     anim_player = AOD.Animation_Player(
           mob ? Data.Image.Enemy.proj_explosion[cast(int)type_eye] :
                 Data.Image.Player.proj_explosion[cast(int)type_eye]);
@@ -163,7 +164,7 @@ public:
     Set_Position(x, y);
   }
   int R_Anim_Index() {
-    return cast(int)anim_player.index;
+    return anim_player.index;
   }
   override void Update() {
     if ( holder !is null ) {

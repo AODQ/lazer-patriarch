@@ -382,7 +382,7 @@ static: public:
     Return:
       Index to the given handle
   */
-  uint Play_Sound(uint handle, float volume = 0.2f,
+  uint Play_Sound(uint handle, float volume = 0.8f,
                   float x = 0.0f, float y = 0.0f, float z = 0.0f)
   in {
     assert(handle >= 0 && handle < sounds.length);

@@ -39,6 +39,7 @@ public:
     int ox = tile_x, oy = tile_y;
     tile_x = x;
     tile_y = y;
+    if ( ox < 0 || oy < 0 || ox >= map.length || oy >= map[0].length ) return;
     foreach ( i; 0 .. map[ox][oy].length )
       if ( map[ox][oy][i] is this ) {
         map[ox][oy] = AOD.Util.Remove(map[ox][oy], cast(int) i);
@@ -124,6 +125,7 @@ public:
       super(x, y, Tile_Type.Prop, Data.Layer.Item);
     Set_Sprite(Data.Image.props[prop_tex]);
     Do_Flip();
+    Set_Visible(true);
   }
   void Set_Collideable(bool x) {
     can_be_stepped_on = !x;

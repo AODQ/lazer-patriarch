@@ -18,7 +18,7 @@ public:
     if ( -- timer <= 0 ) {
       foreach ( l; 0 .. M[tile_x][tile_y].length )
         if ( M[tile_x][tile_y][l] is this ) {
-          M[tile_x][tile_y] = AOD.Util.Remove(M[tile_x][tile_y], cast(int)l);
+          M[tile_x][tile_y] = AOD.Util.Remove(M[tile_x][tile_y], l);
           AOD.Remove(this);
           return;
         }
@@ -30,8 +30,8 @@ class Mob : Entity.Map.Tile {
   int think_timer, shoot_timer;
   int Think_timer_start_min = 20,
       Think_timer_start_max = 25,
-      Shoot_timer_min       = 4,
-      Shoot_timer_max       = 6;
+      Shoot_timer_min       = 6,
+      Shoot_timer_max       = 10;
   AOD.Vector[] goal;
   int goal_x, goal_y;
   bool dir;
@@ -81,13 +81,28 @@ public:
   override bool R_Dead() { return dead_timer > 0; }
 
   override void Update() {
+    // --- SPAWN
+    if ( spawning ) {
+      Set_Visible(true);
+      shadow.Set_Visible(true);
+      shadow.Set_Colour(1.0, 1.0, 1.0, (anim_player.index+1)/6.0f);
+      anim_player.Update();
+      Set_Sprite(anim_player.R_Current_Texture());
+      if ( anim_player.done ) {
+        anim_player = AOD.Animation_Player(Data.Image.Enemy.walk[0]);
+        spawning = false;
+        shadow.Set_Colour(1.0, 1.0, 1.0, 1);
+      }
+      return;
+    }
+
     if ( dead_timer > 0 ) {
       -- dead_timer;
       if ( dead_timer == 0 ) {
         foreach ( t; 0 .. Game_Manager.map[tile_x][tile_y].length ) {
           if ( Game_Manager.map[tile_x][tile_y][t] is this ) {
             Game_Manager.map[tile_x][tile_y] =
-              AOD.Util.Remove(Game_Manager.map[tile_x][tile_y], cast(int)t);
+              AOD.Util.Remove(Game_Manager.map[tile_x][tile_y], t);
             AOD.Remove(this);
             return;
           }
@@ -111,21 +126,6 @@ public:
         prev_x = tile_x;
         prev_y = tile_y;
       }
-    }
-
-    // --- SPAWN
-    if ( spawning ) {
-      Set_Visible(true);
-      shadow.Set_Visible(true);
-      shadow.Set_Colour(1.0, 1.0, 1.0, (anim_player.index+1)/6.0f);
-      anim_player.Update();
-      Set_Sprite(anim_player.R_Current_Texture());
-      if ( anim_player.done ) {
-        anim_player = AOD.Animation_Player(Data.Image.Enemy.walk[0]);
-        spawning = false;
-        shadow.Set_Colour(1.0, 1.0, 1.0, 1);
-      }
-      return;
     }
 
     if ( -- think_timer < 0 ) {

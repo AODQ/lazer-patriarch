@@ -126,9 +126,10 @@ public:
 
   uint stage = 0, stage_it = 0, img_stage, img_ind;
   bool fadeblack = false;
+  bool skipped;
   override void Update() {
     if ( fadeblack ) {
-      float dt = 0.005;
+      float dt = skipped ? 0.5 : 0.015;
       time += dt;
       if ( time >= 1.00f ) {
         AOD.Set_BG_Colour(.08, .08, .095);
@@ -197,6 +198,7 @@ public:
     import derelict.sdl2.sdl;
     if ( time >= end_fade+(400.0f/AOD.R_MS()) ||
          AOD.Input.keystate[SDL_SCANCODE_SPACE]) {
+      skipped = cast(bool)AOD.Input.keystate[SDL_SCANCODE_SPACE];
       /* writeln("FADING"); */
       fadeblack = true;
       Set_Visible(false);

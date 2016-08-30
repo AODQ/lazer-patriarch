@@ -14,7 +14,7 @@ void Init () {
   AOD.Console.console_open = false;
   AOD.Console.Set_Console_Output_Type(AOD.Console.Type.Debug_In);
   import std.conv : to;
-  AOD.Initialize(16, "LUDUM DARE PREP", 800, 600,
+  AOD.Initialize(16, "LAZER PATRIARCH", 800, 600,
       /* to!int(AOD.ClientVars.commands["resolution_x"]), */
       /* to!int(AOD.ClientVars.commands["resolution_y"]), */
       "assets/credit_aod.bmp");
@@ -35,8 +35,8 @@ void Game_Init () {
   static import Data;
   Data.Initialize();
   import Entity.Splashscreen;
-  /* AOD.Add(new Splash(Data.Construct_New_Menu)); */
-  AOD.Add((Data.Construct_New_Menu));
+  AOD.Add(new Splash(Data.Construct_New_Menu));
+  /* AOD.Add((Data.Construct_New_Menu)); */
   /* Game_Manager.Generate_Map(); */
   AOD.Camera.Set_Position(0, 0);
   // -- map
