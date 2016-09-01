@@ -883,47 +883,47 @@ void Update() {
   }
   if ( player is null ) return;
   import std.math;
-  auto px = player.R_Tile_Pos.x, py = player.R_Tile_Pos.y;
-  int rlx = cast(int)AOD.Util.R_Max(0, px - 15),
-      rhx = cast(int)AOD.Util.R_Min(Game_Manager.map.length-1, px + 15);
-  int rly = cast(int)AOD.Util.R_Max(0, py - 15),
-      rhy = cast(int)AOD.Util.R_Min(Game_Manager.map[0].length-1, py + 15);
-  int cnt = 0;
-  Entity.Map.Prop[] props_to_vis;
-  for ( int i = rlx; i != rhx; ++ i)
-  for ( int j = rly; j != rhy; ++ j ) {
-    /* if ( i == px && j == py ) continue; */
-    auto l = AOD.Util.Bresenham_Line(cast(int)px, cast(int)py, i, j);
-    int amt = 0;
-    foreach ( l_i; 1 .. l.length-1 ) {
-      auto cx = cast(int)l[l_i].x, cy = cast(int)l[l_i].y;
-      if ( Game_Manager.map[cx][cy].length == 0 ||
-           Game_Manager.map[cx][cy][$-1].Blocks_Vision() ) {
-        ++ amt;
-      }
-    }
-    float d = Game_Manager.player.R_Light(i, j, amt);
-    foreach ( exp; explosions ) {
-      auto pr = cast(Entity.Projectile.Explosion)(exp);
-      if ( exp !is null )
-        d += pr.R_Light(AOD.Vector(i, j));
-    }
-    foreach ( proj; projectiles ) {
-      auto pr = cast(Entity.Projectile.Projectile)(proj);
-      if ( proj !is null )
-        d += pr.R_Light(AOD.Vector(i*32, j*32));
-    }
-    foreach ( st; stone_doors ) {
-      d += st.R_Light(AOD.Vector(i*32, j*32));
-    }
-    foreach ( k; 0 .. map[i][j].length ) {
-      if ( map[i][j][k].R_Tile_Type == Entity.Map.Tile_Type.Mob ) {
-        import Entity.Mob;
-        auto e = cast(Mob)map[i][j][k];
-        e.Shadow_Col(d);
-      }
-      map[i][j][k].Set_Colour(d, d, d, map[i][j][k].R_Alpha);
-    }
-  }
-  /* player.Set_Colour(1.0, 1.0, 1.0, 1.0); */
+  /* auto px = player.R_Tile_Pos.x, py = player.R_Tile_Pos.y; */
+  /* int rlx = cast(int)AOD.Util.R_Max(0, px - 15), */
+  /*     rhx = cast(int)AOD.Util.R_Min(Game_Manager.map.length-1, px + 15); */
+  /* int rly = cast(int)AOD.Util.R_Max(0, py - 15), */
+  /*     rhy = cast(int)AOD.Util.R_Min(Game_Manager.map[0].length-1, py + 15); */
+  /* int cnt = 0; */
+  /* Entity.Map.Prop[] props_to_vis; */
+  /* for ( int i = rlx; i != rhx; ++ i) */
+  /* for ( int j = rly; j != rhy; ++ j ) { */
+  /*   /1* if ( i == px && j == py ) continue; *1/ */
+  /*   auto l = AOD.Util.Bresenham_Line(cast(int)px, cast(int)py, i, j); */
+  /*   int amt = 0; */
+  /*   foreach ( l_i; 1 .. l.length-1 ) { */
+  /*     auto cx = cast(int)l[l_i].x, cy = cast(int)l[l_i].y; */
+  /*     if ( Game_Manager.map[cx][cy].length == 0 || */
+  /*          Game_Manager.map[cx][cy][$-1].Blocks_Vision() ) { */
+  /*       ++ amt; */
+  /*     } */
+  /*   } */
+  /*   float d = Game_Manager.player.R_Light(i, j, amt); */
+  /*   foreach ( exp; explosions ) { */
+  /*     auto pr = cast(Entity.Projectile.Explosion)(exp); */
+  /*     if ( exp !is null ) */
+  /*       d += pr.R_Light(AOD.Vector(i, j)); */
+  /*   } */
+  /*   foreach ( proj; projectiles ) { */
+  /*     auto pr = cast(Entity.Projectile.Projectile)(proj); */
+  /*     if ( proj !is null ) */
+  /*       d += pr.R_Light(AOD.Vector(i*32, j*32)); */
+  /*   } */
+  /*   foreach ( st; stone_doors ) { */
+  /*     d += st.R_Light(AOD.Vector(i*32, j*32)); */
+  /*   } */
+  /*   foreach ( k; 0 .. map[i][j].length ) { */
+  /*     if ( map[i][j][k].R_Tile_Type == Entity.Map.Tile_Type.Mob ) { */
+  /*       import Entity.Mob; */
+  /*       auto e = cast(Mob)map[i][j][k]; */
+  /*       e.Shadow_Col(d); */
+  /*     } */
+  /*     map[i][j][k].Set_Colour(d, d, d, map[i][j][k].R_Alpha); */
+  /*   } */
+  /* } */
+  /* /1* player.Set_Colour(1.0, 1.0, 1.0, 1.0); *1/ */
 }
