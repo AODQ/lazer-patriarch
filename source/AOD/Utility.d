@@ -54,7 +54,7 @@ T R_Max(T)(T x, T y) { return x > y ? x : y; }
 T R_Min(T)(T x, T y) { return x < y ? x : y; }
 
 /** Returns array with indexed element removed */
-T Remove(T)(T array, int index) in {
+T Remove(T)(T array, size_t index) in {
   assert(index >= 0 && index < array.length);
 } body {
   if ( array.length-1 == index ) return array[0 .. index];

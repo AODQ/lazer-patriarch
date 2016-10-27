@@ -163,7 +163,7 @@ public:
     Set_Sprite(anim_player.R_Current_Texture());
     Set_Position(x, y);
   }
-  int R_Anim_Index() {
+  size_t R_Anim_Index() {
     return anim_player.index;
   }
   override void Update() {

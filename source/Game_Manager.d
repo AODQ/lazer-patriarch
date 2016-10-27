@@ -271,7 +271,7 @@ void Generate_Map() {
     Generate_Path(rms, rms+1, false);
   }
 
-  for ( int i = tmap.length-1; i != tmap.length-13; -- i )
+  for ( size_t i = tmap.length-1; i != tmap.length-13; -- i )
     tmap[$-1][i] = -1;
   for(int i=0; i<tmap.length; ++ i) {
     tmap[i][0]   = -1;

@@ -30,6 +30,9 @@ class Player : Entity.Map.Tile {
   bool dead = false;
   float mob_timer;
   float mob_timer_max;
+  enum Direction { Nil, N, W, S, E };
+  Direction face_direction;
+  Direction move_direction;
 public:
   this(int x, int y) {
     super(x, y, Entity.Map.Tile_Type.Player, Data.Layer.Player, false);
@@ -240,13 +243,40 @@ public:
       }
     }
 
-    if ( -- shoot_timer < 0 && key_shoot && !key_grab ) {
-      shoot_timer = 80;
-      import Entity.Projectile;
-      Game_Manager.Add(new Projectile(tile_x, tile_y, dir_dx, dir_dy,
-                             Entity.Map.Tile_Type.Player, this));
+    bool did_attack = false;
+    void Apply_Move(Direction dir) {
+      if ( move_direction == Direction.Nil )
+        move_direction = dir;
+      if ( dir != move_direction  ) {
+        face_direction = dir;
+        return;
+      }
     }
 
+    face_direction = Direction.Nil;
+
+    switch ( move_direction ) {
+      default: break;
+      case Direction.N: if ( !key_up ) move_direction = Direction.Nil; break;
+      case Direction.S: if ( !key_down ) move_direction = Direction.Nil; break;
+      case Direction.W: if ( !key_left ) move_direction = Direction.Nil; break;
+      case Direction.E: if ( !key_right ) move_direction = Direction.Nil; break;
+    }
+
+    if ( key_down  ) Apply_Move(Direction.S );
+    if ( key_up    ) Apply_Move(Direction.N );
+    if ( key_left  ) Apply_Move(Direction.W );
+    if ( key_right ) Apply_Move(Direction.E );
+
+    key_up = key_down = key_left = key_right = false;
+
+    switch ( move_direction ) {
+      default: break;
+      case Direction.N: key_up    = true; break;
+      case Direction.S: key_down  = true; break;
+      case Direction.E: key_right = true; break;
+      case Direction.W: key_left  = true; break;
+    }
     -- walk_timer;
     int dx = 0, dy = 0;
     if      (key_left  ) { dx = - 1 ; dir_dx = dx; dir_dy =  0; }
@@ -256,6 +286,22 @@ public:
     if ( !key_grab && smooth_scroll >= 1.0f ) {
       grabbed_bot = null;
     }
+
+    int sdx = dx, sdy = dy;
+    switch ( face_direction ) {
+      default: break;
+      case Direction.N: key_up    = true; sdx =  0; sdy =-1;break;
+      case Direction.S: key_down  = true; sdx =  0; sdy = 1;break;
+      case Direction.E: key_right = true; sdx =  1; sdy = 0;break;
+      case Direction.W: key_left  = true; sdx = -1; sdy = 0;break;
+    }
+    if ( -- shoot_timer < 0 && key_shoot && !key_grab ) {
+      shoot_timer = 80;
+      import Entity.Projectile;
+      Game_Manager.Add(new Projectile(tile_x, tile_y, sdx, sdy,
+                             Entity.Map.Tile_Type.Player, this));
+    }
+
 
     if ( -- block_move_timer <= 0 )
       block_move_index = 0;
@@ -364,6 +410,7 @@ public:
               if ( c.R_Prop_Type() == Entity.Map.Prop.Type.Block_Bot ) {
                 AOD.Play_Sound(Data.Sound.gramp_push);
                 grabbed_top = c.R_Top();
+
                 grabbed_bot = c;
                 grabbed_dx = cast(int)(tile_x - c.R_Tile_Pos.x);
                 grabbed_dy = cast(int)(tile_y - c.R_Tile_Pos.y);
@@ -386,9 +433,9 @@ public:
 
     alias Img_Pl = Data.Image.Player;
 
-    if ( (dx != 0 || dy != 0) && !blocked && grabbed_bot is null) {
+    if ( (sdx != 0 || sdy != 0) && !blocked && grabbed_bot is null) {
       flip = false;
-      switch ( dx*10 + dy ) {
+      switch ( sdx*10 + sdy ) {
         default: break;
         case 1 :   anim_player.Set(Img_Pl.walk[Img_Pl.Dir.Down]);
         break;
