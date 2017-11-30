@@ -7,9 +7,6 @@ import AODCore.input;
 import AODCore.sound;
 import AODCore.text;
 import Camera = AODCore.camera;
-import derelict.devil.il;
-import derelict.devil.ilu;
-import derelict.devil.ilut;
 import derelict.freetype.ft;
 import derelict.openal.al;
 import derelict.opengl3.gl;
@@ -112,9 +109,6 @@ public:
       mixin(Load_Library!("DerelictSDL2",
                           "\"SDL2.dll\",SharedLibVersion(2 ,0 ,2)"));
     }
-    mixin(Load_Library!("DerelictIL"        ,""));
-    mixin(Load_Library!("DerelictILU"       ,""));
-    mixin(Load_Library!("DerelictILUT"      ,""));
     mixin(Load_Library!("DerelictAL"        ,""));
     version (linux) {
       mixin(Load_Library!("DerelictVorbis"    , ""));
@@ -137,10 +131,8 @@ public:
                                            SDL_WINDOW_SHOWN );
     writeln("AOD@Realm.d@Creating OpenGL Context");
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  24);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,   8);
     import std.conv : to;
     if ( screen is null ) {
       throw new Exception("Error SDL_CreateWindow: "
@@ -188,11 +180,6 @@ public:
 
     glLoadIdentity();
 
-    ilInit();
-    iluInit();
-    ilutInit();
-    if ( !ilutRenderer(ILUT_OPENGL) )
-      writeln("Error setting ilut Renderer to ILUT_OPENGL");
     import AODCore.vector;
     writeln("AOD@Realm.d@window dimensions: " ~ cast(string)Vector(window_width,
                                                        window_height));

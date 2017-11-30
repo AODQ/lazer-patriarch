@@ -245,44 +245,13 @@ public: static:
   uint spawn, door_open, gramp_dies, stage_complete, monster_dies,
        laser_hit, laser_fire, switch_activate, gramp_push, bg_music,
        monster_hit, monster_fire, health;
+  uint Z, X, C;
   uint[3] gramp_hurt, step;
   uint[10] block_move;
   void Initialize() {
-    spawn           = AOD.Load_Sound("assets/sounds/spawn.ogg"           ) ;
-    door_open       = AOD.Load_Sound("assets/sounds/door-open.ogg"       ) ;
-    gramp_dies      = AOD.Load_Sound("assets/sounds/gramp-dies.ogg"      ) ;
-    stage_complete  = AOD.Load_Sound("assets/sounds/stage-complete.ogg"  ) ;
-    monster_dies    = AOD.Load_Sound("assets/sounds/monster-dies.ogg"    ) ;
-    laser_hit       = AOD.Load_Sound("assets/sounds/laser-hit.ogg"       ) ;
-    laser_fire      = AOD.Load_Sound("assets/sounds/laser-fire.ogg"      ) ;
-    monster_hit     = AOD.Load_Sound("assets/sounds/monster-hit.ogg"       ) ;
-    monster_fire    = AOD.Load_Sound("assets/sounds/monster-fire.ogg"      ) ;
-    switch_activate = AOD.Load_Sound("assets/sounds/switch-activate.ogg" ) ;
-    gramp_push      = AOD.Load_Sound("assets/sounds/gramp-push.ogg"      ) ;
-    health          = AOD.Load_Sound("assets/sounds/pick-health.pgg");
-    bg_music = AOD.Load_Sound("assets/sounds/background-music.ogg");
-    gramp_hurt = [
-      AOD.Load_Sound  ("assets/sounds/gramp-hurt1.ogg"),
-      AOD.Load_Sound  ("assets/sounds/gramp-hurt2.ogg"),
-      AOD.Load_Sound  ("assets/sounds/gramp-hurt3.ogg")
-    ];
-    step = [
-      AOD.Load_Sound  ("assets/sounds/step1.ogg"),
-      AOD.Load_Sound  ("assets/sounds/step2.ogg"),
-      AOD.Load_Sound  ("assets/sounds/step2.ogg")
-    ];
-    block_move = [
-      AOD.Load_Sound  ("assets/sounds/block1.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block2.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block3.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block4.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block5.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block6.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block7.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block8.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block9.ogg"),
-      AOD.Load_Sound  ("assets/sounds/block10.ogg"),
-    ];
+    Z = AOD.Load_Sound("genz.ogg");
+    X = AOD.Load_Sound("geny.ogg");
+    C = AOD.Load_Sound("genx.ogg");
   }
 }
 

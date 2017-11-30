@@ -8,6 +8,7 @@
 		"derelict-ogg": "1.0.1",
 		"derelict-sdl2": "2.0.0",
 		"derelict-util": "2.0.6",
-		"derelict-vorbis": "1.0.1"
+		"derelict-vorbis": "1.0.1",
+		"dlib": "0.11.1"
 	}
 }
